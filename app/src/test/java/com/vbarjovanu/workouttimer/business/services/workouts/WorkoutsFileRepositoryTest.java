@@ -20,7 +20,7 @@ public class WorkoutsFileRepositoryTest {
 
     @Test
     public void loadWorkoutsFile() {
-        WorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
+        IWorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
         Workout[] workouts = null;
         try {
             ClassLoader classLoader = this.getClass().getClassLoader();
@@ -40,7 +40,7 @@ public class WorkoutsFileRepositoryTest {
 
     @Test
     public void saveWorkoutsFile() {
-        WorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
+        IWorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
         String filePath = null;
         Workout[] workoutsLoaded = null;
 

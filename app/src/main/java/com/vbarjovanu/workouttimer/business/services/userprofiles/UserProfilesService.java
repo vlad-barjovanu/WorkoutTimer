@@ -10,4 +10,24 @@ public class UserProfilesService extends ModelsService<UserProfile, UserProfiles
     public UserProfilesService(IModelsFileRepository<UserProfile> modelsFileRepository, IFileRepositorySettings modelsFileRepositorySettings, Class<UserProfile> classT, Class<UserProfilesList> classZ) {
         super(modelsFileRepository, modelsFileRepositorySettings, classT, classZ);
     }
+
+    @Override
+    protected String getFilePath(String profileId) {
+        return this.modelsFileRepositorySettings.getFolderPath() + "/" + this.getModelPluralName() + ".json";
+    }
+
+    @Override
+    public UserProfilesList loadModels() {
+        return this.loadModels(null);
+    }
+
+    @Override
+    public UserProfile loadModel(String primaryKey) {
+        return this.loadModel(null, primaryKey);
+    }
+
+    @Override
+    public boolean saveModel(UserProfile userProfile) {
+        return this.saveModel(null, userProfile);
+    }
 }

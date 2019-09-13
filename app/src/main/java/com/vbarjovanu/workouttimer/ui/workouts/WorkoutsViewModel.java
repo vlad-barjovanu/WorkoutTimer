@@ -12,8 +12,6 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
 
     private String selectedWorkoutId;
 
-    private CountDownLatch countDownLatch;
-
     public WorkoutsViewModel(IFileRepositorySettings fileRepositorySettings) {
         this.workoutsLiveData = new WorkoutsLiveData(fileRepositorySettings);
     }

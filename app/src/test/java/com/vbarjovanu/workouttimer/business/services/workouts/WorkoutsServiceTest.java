@@ -26,9 +26,9 @@ public class WorkoutsServiceTest {
         URL resource = classLoader.getResource("business/services/workouts/Workouts.json");
         List<Workout> workoutList;
         String folderPath = resource.getPath().replace("/Workouts.json", "");
-        WorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
+        IWorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
         IFileRepositorySettings settings = new FileRepositorySettings(folderPath);
-        WorkoutsService workoutsService = new WorkoutsService(workoutsFileRepository, settings, Workout.class, WorkoutsList.class);
+        IWorkoutsService workoutsService = new WorkoutsService(workoutsFileRepository, settings, Workout.class, WorkoutsList.class);
         workoutList = workoutsService.loadModels("profile123");
         Assert.assertNotNull(workoutList);
         Assert.assertEquals(2, workoutList.size());
@@ -45,9 +45,9 @@ public class WorkoutsServiceTest {
         assert classLoader != null;
         URL resource = classLoader.getResource("business/services/workouts/Workouts.json");
         String folderPath = resource.getPath().replace("/Workouts.json", "");
-        WorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
+        IWorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
         IFileRepositorySettings settings = new FileRepositorySettings(folderPath);
-        WorkoutsService workoutsService = new WorkoutsService(workoutsFileRepository, settings, Workout.class, WorkoutsList.class);
+        IWorkoutsService workoutsService = new WorkoutsService(workoutsFileRepository, settings, Workout.class, WorkoutsList.class);
         String workoutId = "456";
         workout = workoutsService.loadModel("profile123", workoutId);
         Assert.assertNotNull(workout);
@@ -62,8 +62,8 @@ public class WorkoutsServiceTest {
         String folderPath;
         folderPath = folder.getRoot().getPath();
         IFileRepositorySettings settings = new FileRepositorySettings(folderPath);
-        WorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
-        WorkoutsService workoutsService = new WorkoutsService(workoutsFileRepository, settings, Workout.class, WorkoutsList.class);
+        IWorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
+        IWorkoutsService workoutsService = new WorkoutsService(workoutsFileRepository, settings, Workout.class, WorkoutsList.class);
 
         profileId = "456";
         workout = new Workout("789");

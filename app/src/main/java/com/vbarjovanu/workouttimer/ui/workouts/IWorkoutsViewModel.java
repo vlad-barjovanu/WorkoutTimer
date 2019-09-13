@@ -1,9 +1,6 @@
 package com.vbarjovanu.workouttimer.ui.workouts;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
-
-import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
 
 public abstract class IWorkoutsViewModel extends ViewModel {
     /**

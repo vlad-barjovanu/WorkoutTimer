@@ -8,7 +8,7 @@ import java.lang.reflect.Array;
 
 public class ModelsService<T extends IModel<T>, Z extends ModelsList<T>> implements IModelsService<T, Z> {
     private final IModelsFileRepository<T> modelsFileRepository;
-    private final IFileRepositorySettings modelsFileRepositorySettings;
+    protected final IFileRepositorySettings modelsFileRepositorySettings;
     private final Class<T> classT;
     private final Class<Z> classZ;
 
@@ -19,11 +19,11 @@ public class ModelsService<T extends IModel<T>, Z extends ModelsList<T>> impleme
         this.classZ = classZ;
     }
 
-    private String getModelPluralName() {
+    protected String getModelPluralName() {
         return this.classT.getSimpleName() + "s";
     }
 
-    private String getFilePath(String profileId) {
+    protected String getFilePath(String profileId) {
         return this.modelsFileRepositorySettings.getFolderPath() + "/" + this.getModelPluralName() + "-" + profileId + ".json";
     }
 

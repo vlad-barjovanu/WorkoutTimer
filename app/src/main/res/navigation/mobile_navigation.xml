@@ -25,7 +25,7 @@
 
     <fragment
         android:id="@+id/nav_tools"
-        android:name="com.vbarjovanu.workouttimer.ui.tools.ToolsFragment"
+        android:name="com.vbarjovanu.workouttimer.ui.userprofiles.UserProfilesFragment"
         android:label="@string/menu_tools"
         tools:layout="@layout/fragment_tools" />
 
