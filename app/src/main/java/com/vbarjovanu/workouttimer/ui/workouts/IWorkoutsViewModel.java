@@ -14,7 +14,20 @@ public abstract class IWorkoutsViewModel extends ViewModel {
 
     /**
      * Rerturns the available workouts
-     * @return workouts list
+     * @return workouts live data
      */
-    public abstract LiveData<WorkoutsList> getWorkouts();
+    public abstract WorkoutsLiveData getWorkouts();
+
+    /**
+     * Selects a specific workout by ID
+     * @param id workout's ID that was selected by user
+     * @return true if selection is successful
+     */
+    public abstract boolean setSelectedWorkoutId(String id);
+
+    /**
+     * Returns the selected workout ID
+     * @return selected workout's ID
+     */
+    public abstract String getSelectedWorkoutId();
 }

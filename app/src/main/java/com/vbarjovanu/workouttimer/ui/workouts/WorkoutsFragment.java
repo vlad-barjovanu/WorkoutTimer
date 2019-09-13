@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
+import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 
 public class WorkoutsFragment extends Fragment {
@@ -23,7 +24,9 @@ public class WorkoutsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         String profileId;
         CustomViewModelFactory factory;
-        factory= new CustomViewModelFactory();
+        IFileRepositorySettings fileRepositorySettings = null;
+        //TODO - IFileRepositorySettings fileRepositorySettings initialise
+        factory= new CustomViewModelFactory(fileRepositorySettings);
         workoutsViewModel = ViewModelProviders.of(this, factory).get(IWorkoutsViewModel.class);
         View root = inflater.inflate(R.layout.fragment_workouts, container, false);
         final TextView textView = root.findViewById(R.id.text_gallery);
