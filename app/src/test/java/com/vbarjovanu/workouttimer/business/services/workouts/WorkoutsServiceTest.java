@@ -4,6 +4,7 @@ import com.vbarjovanu.workouttimer.business.models.workouts.Workout;
 import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
 import com.vbarjovanu.workouttimer.business.services.generic.FileRepositorySettings;
 import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
+import com.vbarjovanu.workouttimer.helpers.files.TextFileReader;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -11,6 +12,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.List;
 
@@ -56,7 +59,7 @@ public class WorkoutsServiceTest {
     }
 
     @Test
-    public void saveWorkout() {
+    public void saveWorkout() throws IOException {
         String profileId;
         Workout workout;
         String folderPath;
@@ -69,7 +72,24 @@ public class WorkoutsServiceTest {
         workout = new Workout("789");
         workout.setName("workout1").setPrepareDuration(5).setWorkDescription("push ups").setWorkDuration(10);
         workoutsService.saveModel(profileId, workout);
-        File file = new File(folderPath+"/Workouts-"+profileId+".json");
+        File file = new File(folderPath + "/Workouts-" + profileId + ".json");
         Assert.assertTrue(file.exists());
+        TextFileReader textFileReader = new TextFileReader();
+        StringBuilder sb = textFileReader.readFile(file.getPath());
+        Assert.assertTrue(sb.toString().contains("789"));
+    }
+
+    @Test
+    public void createWorkout() throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        Workout workout;
+        String folderPath;
+        folderPath = folder.getRoot().getPath();
+        IFileRepositorySettings settings = new FileRepositorySettings(folderPath);
+        IWorkoutsFileRepository workoutsFileRepository = new WorkoutsFileRepository(Workout.class, Workout[].class);
+        IWorkoutsService workoutsService = new WorkoutsService(workoutsFileRepository, settings, Workout.class, WorkoutsList.class);
+
+        workout = workoutsService.createModel();
+        Assert.assertNotNull(workout);
+        Assert.assertNotNull(workout.getId());
     }
 }

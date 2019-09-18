@@ -6,8 +6,10 @@ import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySett
 import com.vbarjovanu.workouttimer.business.services.generic.IModelsFileRepository;
 import com.vbarjovanu.workouttimer.business.services.generic.ModelsService;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class UserProfilesService extends ModelsService<UserProfile, UserProfilesList> implements IUserProfilesService {
-    public UserProfilesService(IModelsFileRepository<UserProfile> modelsFileRepository, IFileRepositorySettings modelsFileRepositorySettings, Class<UserProfile> classT, Class<UserProfilesList> classZ) {
+    UserProfilesService(IModelsFileRepository<UserProfile> modelsFileRepository, IFileRepositorySettings modelsFileRepositorySettings, Class<UserProfile> classT, Class<UserProfilesList> classZ) {
         super(modelsFileRepository, modelsFileRepositorySettings, classT, classZ);
     }
 
@@ -29,5 +31,14 @@ public class UserProfilesService extends ModelsService<UserProfile, UserProfiles
     @Override
     public boolean saveModel(UserProfile userProfile) {
         return this.saveModel(null, userProfile);
+    }
+
+    @Override
+    public UserProfile createDefaultModel() throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        UserProfile userProfile =        this.createModel();
+        userProfile.setName("Default");
+        userProfile.setDescription("Default user profile");
+        userProfile.setImageFilePath(null);
+        return userProfile;
     }
 }

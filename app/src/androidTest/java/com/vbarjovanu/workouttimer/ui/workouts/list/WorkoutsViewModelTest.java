@@ -1,8 +1,9 @@
-package com.vbarjovanu.workouttimer.ui.workouts;
+package com.vbarjovanu.workouttimer.ui.workouts.list;
 
 import android.content.Context;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -10,6 +11,8 @@ import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
 import com.vbarjovanu.workouttimer.business.services.generic.FileRepositorySettings;
 import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
 import com.vbarjovanu.workouttimer.helpers.assets.AssetsFileExporter;
+import com.vbarjovanu.workouttimer.ui.workouts.list.IWorkoutsViewModel;
+import com.vbarjovanu.workouttimer.ui.workouts.list.WorkoutsViewModel;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 public class WorkoutsViewModelTest {
@@ -60,11 +62,12 @@ public class WorkoutsViewModelTest {
         //init workoutslivedata with file repo settings
         fileRepoSettings = new FileRepositorySettings(folderPath);
         this.workoutsViewModel = new WorkoutsViewModel(fileRepoSettings);
+        //noinspection unchecked
         this.observer = mock(Observer.class);
         this.workoutsViewModel.getWorkouts().observeForever(this.observer);
         //load data and check if observer's onChanged method was triggered
         this.countDownLatch = new CountDownLatch(1);
-        workoutsViewModel.getWorkouts().setCountDownLatch(countDownLatch);
+        workoutsViewModel.setCountDownLatch(countDownLatch);
     }
 
     @Test
@@ -85,7 +88,7 @@ public class WorkoutsViewModelTest {
 
     @Test
     public void getWorkouts() {
-        WorkoutsLiveData workoutsLiveData = workoutsViewModel.getWorkouts();
+        LiveData<WorkoutsList> workoutsLiveData = workoutsViewModel.getWorkouts();
         Assert.assertNotNull(workoutsLiveData);
     }
 

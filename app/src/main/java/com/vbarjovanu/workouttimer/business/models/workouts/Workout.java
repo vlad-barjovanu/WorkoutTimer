@@ -142,4 +142,9 @@ public class Workout implements IModel<Workout> {
     public String getPrimaryKey() {
         return this.getId();
     }
+
+    @Override
+    public void setPrimaryKey(String primaryKey) {
+        this.setId(primaryKey);
+    }
 }

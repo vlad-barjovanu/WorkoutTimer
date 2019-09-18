@@ -1,17 +1,19 @@
-package com.vbarjovanu.workouttimer.ui.userprofiles;
+package com.vbarjovanu.workouttimer.ui.userprofiles.list;
 
+import android.app.Application;
 import android.content.Context;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfilesList;
-import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
 import com.vbarjovanu.workouttimer.business.services.generic.FileRepositorySettings;
 import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
 import com.vbarjovanu.workouttimer.helpers.assets.AssetsFileExporter;
-import com.vbarjovanu.workouttimer.ui.workouts.WorkoutsLiveData;
+import com.vbarjovanu.workouttimer.ui.userprofiles.list.IUserProfilesViewModel;
+import com.vbarjovanu.workouttimer.ui.userprofiles.list.UserProfilesViewModel;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,12 +61,13 @@ public class UserProfilesViewModelTest {
 
         //init workoutslivedata with file repo settings
         fileRepoSettings = new FileRepositorySettings(folderPath);
-        this.userProfilesViewModel = new UserProfilesViewModel(fileRepoSettings);
+        this.userProfilesViewModel = new UserProfilesViewModel((Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext(), fileRepoSettings);
+        //noinspection unchecked
         this.observer = mock(Observer.class);
         this.userProfilesViewModel.getUserProfiles().observeForever(this.observer);
         //load data and check if observer's onChanged method was triggered
         this.countDownLatch = new CountDownLatch(1);
-        userProfilesViewModel.getUserProfiles().setCountDownLatch(countDownLatch);
+        userProfilesViewModel.setCountDownLatch(countDownLatch);
     }
 
     @Test
@@ -83,8 +86,8 @@ public class UserProfilesViewModelTest {
 
     @Test
     public void getWorkouts() {
-        UserProfilesLiveData workoutsLiveData = userProfilesViewModel.getUserProfiles();
-        Assert.assertNotNull(workoutsLiveData);
+        LiveData<UserProfilesList> userProfilesList = userProfilesViewModel.getUserProfiles();
+        Assert.assertNotNull(userProfilesList);
     }
 
     @Test

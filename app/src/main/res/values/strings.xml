@@ -10,7 +10,16 @@
     <string name="menu_home">Home</string>
     <string name="menu_workouts">Workouts</string>
     <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_tools">Tools</string>
+    <string name="menu_userprofiles">User Profiles</string>
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="name">Name</string>
+    <string name="userprofile">User profile</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="userprofileimage">User profile image</string>
+    <string name="image">Image</string>
+    <string name="communicate">Communicate</string>
 </resources>

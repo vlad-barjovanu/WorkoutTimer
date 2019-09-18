@@ -1,32 +1,55 @@
 package com.vbarjovanu.workouttimer.ui.generic.viewmodels;
 
+import android.app.Application;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.vbarjovanu.workouttimer.IMainActivityViewModel;
+import com.vbarjovanu.workouttimer.MainActivityViewModel;
+import com.vbarjovanu.workouttimer.business.services.generic.FileRepositorySettings;
 import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
-import com.vbarjovanu.workouttimer.ui.userprofiles.IUserProfilesViewModel;
-import com.vbarjovanu.workouttimer.ui.userprofiles.UserProfilesViewModel;
-import com.vbarjovanu.workouttimer.ui.workouts.IWorkoutsViewModel;
-import com.vbarjovanu.workouttimer.ui.workouts.WorkoutsViewModel;
+import com.vbarjovanu.workouttimer.session.ApplicationSessionFactory;
+import com.vbarjovanu.workouttimer.ui.userprofiles.edit.IUserProfileEditViewModel;
+import com.vbarjovanu.workouttimer.ui.userprofiles.list.IUserProfilesViewModel;
+import com.vbarjovanu.workouttimer.ui.userprofiles.edit.UserProfileEditViewModel;
+import com.vbarjovanu.workouttimer.ui.userprofiles.list.UserProfilesViewModel;
+import com.vbarjovanu.workouttimer.ui.workouts.list.IWorkoutsViewModel;
+import com.vbarjovanu.workouttimer.ui.workouts.list.WorkoutsViewModel;
 
 public class CustomViewModelFactory implements ViewModelProvider.Factory {
     private IFileRepositorySettings fileRepositorySettings;
+    private Application application;
 
-    public CustomViewModelFactory(IFileRepositorySettings fileRepositorySettings) {
+    public static CustomViewModelFactory getInstance(@NonNull Application application){
+        String folderPath = ApplicationSessionFactory.getApplicationSession(application.getApplicationContext()).getFileRepositoriesFolderPath();
+        return new CustomViewModelFactory(application, new FileRepositorySettings(folderPath));
+    }
+
+    private CustomViewModelFactory(@NonNull Application application, IFileRepositorySettings fileRepositorySettings) {
         this.fileRepositorySettings = fileRepositorySettings;
+        this.application = application;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if(modelClass.isAssignableFrom(IWorkoutsViewModel.class)){
+        if (modelClass.isAssignableFrom(IMainActivityViewModel.class)) {
+            //noinspection unchecked
+            return (T) new MainActivityViewModel(this.application, this.fileRepositorySettings);
+        }
+        if (modelClass.isAssignableFrom(IWorkoutsViewModel.class)) {
             //noinspection unchecked
             return (T) new WorkoutsViewModel(this.fileRepositorySettings);
         }
-        if(modelClass.isAssignableFrom(IUserProfilesViewModel.class)){
+        if (modelClass.isAssignableFrom(IUserProfilesViewModel.class)) {
             //noinspection unchecked
-            return (T) new UserProfilesViewModel(this.fileRepositorySettings);
+            return (T) new UserProfilesViewModel(this.application, this.fileRepositorySettings);
+        }
+        if (modelClass.isAssignableFrom(IUserProfileEditViewModel.class)) {
+            //noinspection unchecked
+            return (T) new UserProfileEditViewModel(this.application, this.fileRepositorySettings);
         }
         try {
             return modelClass.newInstance();

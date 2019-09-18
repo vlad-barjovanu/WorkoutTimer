@@ -5,6 +5,8 @@ import com.vbarjovanu.workouttimer.business.models.generic.IModel;
 public class UserProfile implements IModel<UserProfile> {
     private String id;
     private String name;
+    private String description;
+    private String imageFilePath;
 
     public UserProfile(String id) {
         this.setId(id);
@@ -28,15 +30,39 @@ public class UserProfile implements IModel<UserProfile> {
         return this;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public UserProfile setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public String getImageFilePath() {
+        return imageFilePath;
+    }
+
+    public UserProfile setImageFilePath(String imageFilePath) {
+        this.imageFilePath = imageFilePath;
+        return this;
+    }
+
     @Override
     public String getPrimaryKey() {
         return this.getId();
     }
 
     @Override
+    public void setPrimaryKey(String primaryKey) {
+        this.setId(primaryKey);
+    }
+
+    @Override
     public void update(UserProfile object) {
-        UserProfile userProfile = object;
-        this.setId(userProfile.getId());
-        this.setName(userProfile.getName());
+        this.setId(object.getId())
+                .setName(object.getName())
+                .setDescription(object.getDescription())
+                .setImageFilePath(object.getImageFilePath());
     }
 }

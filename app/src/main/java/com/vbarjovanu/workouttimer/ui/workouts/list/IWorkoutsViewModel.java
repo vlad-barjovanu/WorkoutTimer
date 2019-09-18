@@ -1,8 +1,12 @@
-package com.vbarjovanu.workouttimer.ui.workouts;
+package com.vbarjovanu.workouttimer.ui.workouts.list;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-public abstract class IWorkoutsViewModel extends ViewModel {
+import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
+import com.vbarjovanu.workouttimer.ui.generic.viewmodels.ISynchronizable;
+
+public abstract class IWorkoutsViewModel extends ViewModel implements ISynchronizable {
     /**
      * Loads the workouts for the specified user profile
      * @param profileId ID of the user's profile
@@ -13,7 +17,7 @@ public abstract class IWorkoutsViewModel extends ViewModel {
      * Rerturns the available workouts
      * @return workouts live data
      */
-    public abstract WorkoutsLiveData getWorkouts();
+    public abstract LiveData<WorkoutsList> getWorkouts();
 
     /**
      * Selects a specific workout by ID

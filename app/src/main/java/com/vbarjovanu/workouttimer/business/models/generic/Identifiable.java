@@ -1,5 +1,7 @@
 package com.vbarjovanu.workouttimer.business.models.generic;
 
 public interface Identifiable {
-    public String getPrimaryKey();
+    String getPrimaryKey();
+
+    void setPrimaryKey(String primaryKey);
 }

@@ -1,4 +1,4 @@
-package com.vbarjovanu.workouttimer.ui.workouts;
+package com.vbarjovanu.workouttimer.ui.workouts.list;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
-import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
+import com.vbarjovanu.workouttimer.session.ApplicationSessionFactory;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 
 public class WorkoutsFragment extends Fragment {
@@ -23,21 +23,17 @@ public class WorkoutsFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         String profileId;
-        CustomViewModelFactory factory;
-        IFileRepositorySettings fileRepositorySettings = null;
-        //TODO - IFileRepositorySettings fileRepositorySettings initialise
-        factory= new CustomViewModelFactory(fileRepositorySettings);
-        workoutsViewModel = ViewModelProviders.of(this, factory).get(IWorkoutsViewModel.class);
+        workoutsViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IWorkoutsViewModel.class);
         View root = inflater.inflate(R.layout.fragment_workouts, container, false);
-        final TextView textView = root.findViewById(R.id.text_gallery);
+        final TextView textView = root.findViewById(R.id.text_workouts);
         workoutsViewModel.getWorkouts().observe(this, new Observer<WorkoutsList>() {
             @Override
             public void onChanged(@Nullable WorkoutsList workouts) {
-                textView.setText(workouts.size());
+                textView.setText("Workouts");
             }
         });
 
-        profileId="123";
+        profileId = ApplicationSessionFactory.getApplicationSession(this.getContext()).getUserProfileId();
         workoutsViewModel.loadWorkouts(profileId);
         return root;
     }

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical"
+    android:scrollbarStyle="outsideInset">
+
+    <TextView
+        android:id="@+id/fragment_userprofile_edit_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_margin="2pt"
+        android:text="@string/userprofile"
+        android:textSize="30sp" />
+
+    <EditText
+        android:id="@+id/fragment_userprofile_edit_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_userprofile_edit_title"
+        android:layout_margin="2pt"
+        android:hint="@string/name"
+        android:textSize="30sp"
+        android:inputType="text"
+        android:importantForAutofill="no" />
+
+    <EditText
+        android:id="@+id/fragment_userprofile_edit_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_userprofile_edit_name"
+        android:layout_margin="2pt"
+        android:hint="@string/description"
+        android:textSize="30sp"
+        android:inputType="text"
+        android:importantForAutofill="no" />
+
+    <ImageView
+        android:id="@+id/fragment_userprofile_edit_image"
+        android:layout_width="50pt"
+        android:layout_height="50pt"
+        android:layout_below="@id/fragment_userprofile_edit_description"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5pt"
+        android:contentDescription="@string/userprofileimage" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/fragment_userprofile_edit_save"
+            style="@android:style/ButtonBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="@string/save"
+            android:drawableEnd="@android:drawable/ic_menu_save"
+            android:text="@string/save"
+            android:textSize="32sp"
+            android:textColor="@android:color/holo_green_dark"/>
+
+        <Button
+            android:id="@+id/fragment_userprofile_edit_cancel"
+            style="@android:style/ButtonBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="@string/cancel"
+            android:drawableEnd="@android:drawable/ic_menu_close_clear_cancel"
+            android:text="@string/cancel"
+            android:textSize="32sp"
+            android:textColor="@android:color/holo_red_dark"/>
+    </LinearLayout>
+</RelativeLayout>

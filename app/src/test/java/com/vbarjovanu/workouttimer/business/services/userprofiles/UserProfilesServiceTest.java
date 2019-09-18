@@ -8,6 +8,7 @@ import com.vbarjovanu.workouttimer.business.services.generic.FileRepositorySetti
 import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
 import com.vbarjovanu.workouttimer.business.services.workouts.WorkoutsFileRepository;
 import com.vbarjovanu.workouttimer.business.services.workouts.WorkoutsService;
+import com.vbarjovanu.workouttimer.helpers.files.TextFileReader;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -15,6 +16,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.List;
 
@@ -25,7 +28,7 @@ public class UserProfilesServiceTest {
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void loadWorkouts() {
+    public void loadUserProfiles() {
         ClassLoader classLoader = this.getClass().getClassLoader();
         assert classLoader != null;
         URL resource = classLoader.getResource("business/services/userprofiles/UserProfiles.json");
@@ -44,7 +47,7 @@ public class UserProfilesServiceTest {
     }
 
     @Test
-    public void loadWorkout() {
+    public void loadUserProfile() {
         UserProfile userProfile;
         ClassLoader classLoader = this.getClass().getClassLoader();
         assert classLoader != null;
@@ -61,19 +64,35 @@ public class UserProfilesServiceTest {
     }
 
     @Test
-    public void saveWorkout() {
+    public void saveUserProfile() throws IOException {
         String profileId;
-        UserProfile workout;
+        UserProfile userProfile;
         String folderPath;
         folderPath = folder.getRoot().getPath();
         IFileRepositorySettings settings = new FileRepositorySettings(folderPath);
         IUserProfilesFileRepository userProfilesFileRepository = new UserProfilesFileRepository(UserProfile.class, UserProfile[].class);
         IUserProfilesService userProfilesService = new UserProfilesService(userProfilesFileRepository, settings, UserProfile.class, UserProfilesList.class);
 
-        workout = new UserProfile("ghi");
-        workout.setName("profile3");
-        userProfilesService.saveModel(workout);
+        userProfile = new UserProfile("ghi");
+        userProfile.setName("profile3");
+        userProfilesService.saveModel(userProfile);
         File file = new File(folderPath+"/UserProfiles.json");
         Assert.assertTrue(file.exists());
+        TextFileReader textFileReader = new TextFileReader();
+        StringBuilder sb = textFileReader.readFile(file.getPath());
+        Assert.assertTrue(sb.toString().contains("ghi"));
+    }
+
+    @Test
+    public void createUserProfile() throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        UserProfile userProfile;
+        String folderPath;
+        folderPath = folder.getRoot().getPath();
+        IFileRepositorySettings settings = new FileRepositorySettings(folderPath);
+        IUserProfilesFileRepository userProfilesFileRepository = new UserProfilesFileRepository(UserProfile.class, UserProfile[].class);
+        IUserProfilesService userProfilesService = new UserProfilesService(userProfilesFileRepository, settings, UserProfile.class, UserProfilesList.class);
+        userProfile=userProfilesService.createModel();
+        Assert.assertNotNull(userProfile);
+        Assert.assertNotNull(userProfile.getId());
     }
 }
