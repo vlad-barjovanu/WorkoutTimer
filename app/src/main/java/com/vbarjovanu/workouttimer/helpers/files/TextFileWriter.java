@@ -10,10 +10,11 @@ public class TextFileWriter {
     /**
      * @param filePath file path and name where to save the content
      * @param content file's content to be saved
-     * @throws IOException
+     * @throws IOException when file can't be written
      */
     public void writeFile(String filePath, String content) throws IOException {
         File file = new File(filePath);
+        FolderHelper.mkdir(file.getParentFile().getAbsolutePath(), true);
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         bw.write(content, 0, content.length());
         bw.flush();
