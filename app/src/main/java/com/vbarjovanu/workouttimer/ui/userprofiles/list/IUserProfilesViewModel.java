@@ -5,14 +5,18 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfilesList;
-import com.vbarjovanu.workouttimer.ui.SingleLiveEvent;
+import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesService;
+import com.vbarjovanu.workouttimer.session.IApplicationSession;
+import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.ISynchronizable;
 
-public abstract class IUserProfilesViewModel extends AndroidViewModel implements ISynchronizable{
-    IUserProfilesViewModel(@NonNull Application application) {
-        super(application);
+public abstract class IUserProfilesViewModel extends ViewModel implements ISynchronizable{
+
+    IUserProfilesViewModel() {
+        super();
     }
 
     /**

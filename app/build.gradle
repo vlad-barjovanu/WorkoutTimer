@@ -11,6 +11,9 @@ android {
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    dataBinding {
+        enabled = true
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -49,7 +52,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'androidx.arch.core:core-testing:2.1.0'
-    testImplementation "org.mockito:mockito-android:2.25.0"
+    testImplementation "org.mockito:mockito-core:2.28.2"
     testImplementation 'androidx.test:runner:1.2.0'
     testImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation 'junit:junit:4.12'

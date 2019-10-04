@@ -3,14 +3,15 @@ package com.vbarjovanu.workouttimer;
 import android.app.Application;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
-import com.vbarjovanu.workouttimer.ui.SingleLiveEvent;
+import com.vbarjovanu.workouttimer.ui.generic.events.Event;
+import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
 
-public abstract class IMainActivityViewModel extends AndroidViewModel {
-    IMainActivityViewModel(@NonNull Application application) {
-        super(application);
+public abstract class IMainActivityViewModel extends ViewModel {
+    IMainActivityViewModel() {
+        super();
     }
 
     /**
@@ -19,5 +20,26 @@ public abstract class IMainActivityViewModel extends AndroidViewModel {
      */
     abstract void initUserProfile();
 
-    abstract SingleLiveEvent<MainActivityAction> getAction();
+    abstract public Event<EventContent<MainActivityActionData>> getAction();
+
+    abstract public LiveData<MainActivityModel> getModel();
+
+    abstract public void showNewEntityButton(boolean visible);
+
+    abstract public void showSaveEntityButton(boolean visible);
+
+    /**
+     * A new entity should be created, by user action
+     */
+    public abstract void newEntity();
+
+    /**
+     * The entity should be saved, by user action
+     */
+    public abstract void saveEntity();
+
+    /**
+     * The entity edit should be canceled, by user action
+     */
+    public abstract void cancelEntity();
 }

@@ -34,11 +34,26 @@ public class UserProfilesService extends ModelsService<UserProfile, UserProfiles
     }
 
     @Override
+    public boolean deleteModel(UserProfile userProfile) {
+        return this.deleteModel(null, userProfile);
+    }
+
+    @Override
+    public boolean deleteModel(String userProfileId) {
+        return this.deleteModel(null, userProfileId);
+    }
+
+    @Override
     public UserProfile createDefaultModel() throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        UserProfile userProfile =        this.createModel();
+        UserProfile userProfile = this.createModel();
         userProfile.setName("Default");
         userProfile.setDescription("Default user profile");
         userProfile.setImageFilePath(null);
         return userProfile;
+    }
+
+    @Override
+    public String getImagesFolderPath() {
+        return this.modelsFileRepositorySettings.getFolderPath() + "/images/";
     }
 }

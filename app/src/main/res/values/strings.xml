@@ -22,4 +22,21 @@
     <string name="userprofileimage">User profile image</string>
     <string name="image">Image</string>
     <string name="communicate">Communicate</string>
+    <string name="workout">Workout</string>
+    <string name="three_vertical_dots">⋮</string>
+    <string name="start_workout">Start workout</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="prepare_duration">Prepare duration</string>
+    <string name="work_duration">Work duration</string>
+    <string name="work_description">Work description</string>
+    <string name="workout_description">Workout description</string>
+    <string name="rest_description">Rest description</string>
+    <string name="rest_duration">Rest duration</string>
+    <string name="cycles_count">Cycles count</string>
+    <string name="sets_count">Sets count</string>
+    <string name="rest_between_sets_duration">Rest between sets duration</string>
+    <string name="cool_down_duration">Cool down duration</string>
+    <string name="edit_workout">Edit workout</string>
+    <string name="message_no_workouts_are_defined">No workouts are defined yet. Add one to begin with!</string>
 </resources>

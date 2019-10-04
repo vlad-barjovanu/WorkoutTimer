@@ -8,25 +8,27 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.vbarjovanu.workouttimer.business.models.workouts.Workout;
 import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
-import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
 import com.vbarjovanu.workouttimer.business.services.workouts.IWorkoutsService;
-import com.vbarjovanu.workouttimer.business.services.workouts.WorkoutsFactory;
+import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 
 import java.util.concurrent.CountDownLatch;
 
 public class WorkoutsViewModel extends IWorkoutsViewModel {
 
+    private IWorkoutsService workoutsService;
+
     private MutableLiveData<WorkoutsList> workoutsLiveData;
+
+    private SingleLiveEvent<WorkoutsFragmentActionData> actionData;
 
     private String selectedWorkoutId;
 
     private CountDownLatch countDownLatch;
 
-    private final IFileRepositorySettings fileRepositorySettings;
-
-    public WorkoutsViewModel(IFileRepositorySettings fileRepositorySettings) {
-        this.fileRepositorySettings = fileRepositorySettings;
+    public WorkoutsViewModel(IWorkoutsService workoutsService) {
+        this.workoutsService = workoutsService;
         this.workoutsLiveData = new MutableLiveData<>();
+        this.actionData = new SingleLiveEvent<>();
     }
 
     @Override
@@ -37,6 +39,11 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
     @Override
     public LiveData<WorkoutsList> getWorkouts() {
         return this.workoutsLiveData;
+    }
+
+    @Override
+    SingleLiveEvent<WorkoutsFragmentActionData> getActionData() {
+        return this.actionData;
     }
 
     @Override
@@ -58,12 +65,29 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
     }
 
     @Override
+    public void newWorkout(String profileId) {
+        this.actionData.setValue(new WorkoutsFragmentActionData(WorkoutsFragmentAction.GOTO_WORKOUT_NEW, profileId, null));
+    }
+
+    @Override
+    public void editWorkout(String profileId, String workoutId) {
+        this.actionData.setValue(new WorkoutsFragmentActionData(WorkoutsFragmentAction.GOTO_WORKOUT_EDIT, profileId, workoutId));
+    }
+
+    @Override
+    public void deleteWorkout(String profileId, String workoutId) {
+        if (this.workoutsService.deleteModel(profileId, workoutId)) {
+            this.loadWorkouts(profileId);
+        }
+    }
+
+    @Override
     public void setCountDownLatch(CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }
 
     private void decreaseCountDownLatch() {
-        if(this.countDownLatch!=null) {
+        if (this.countDownLatch != null) {
             this.countDownLatch.countDown();
         }
     }
@@ -76,20 +100,13 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
         }
 
         @Override
-        protected void onPreExecute() {
-            Log.v("loaddata", "preexecute");
-            super.onPreExecute();
-        }
-
-        @Override
         protected WorkoutsList doInBackground(String... strings) {
             WorkoutsList data;
             String profileId;
 
             Log.v("loaddata", "doInBackground");
             profileId = strings[0];
-            IWorkoutsService workoutsService = WorkoutsFactory.getWorkoutsService(this.workoutsViewModel.fileRepositorySettings);
-            data = workoutsService.loadModels(profileId);
+            data = this.workoutsViewModel.workoutsService.loadModels(profileId);
             return data;
         }
 
@@ -98,6 +115,37 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
             Log.v("loaddata", "onPostExecute");
             this.workoutsViewModel.workoutsLiveData.setValue(data);
             this.workoutsViewModel.decreaseCountDownLatch();
+        }
+    }
+
+    static class DeleteAsyncTask extends AsyncTask<String, Void, Boolean> {
+        WorkoutsViewModel workoutsViewModel;
+        private String profileId;
+        private String workoutId;
+
+        DeleteAsyncTask(WorkoutsViewModel workoutsViewModel) {
+            this.workoutsViewModel = workoutsViewModel;
+        }
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            Boolean data;
+
+            Log.v("deletedata", "doInBackground");
+            this.profileId = strings[0];
+            this.workoutId = strings[1];
+            data = this.workoutsViewModel.workoutsService.deleteModel(this.profileId, this.workoutId);
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean data) {
+            Log.v("deletedata", "onPostExecute");
+            if (data) {
+                this.workoutsViewModel.loadWorkouts(this.profileId);
+            } else {
+                this.workoutsViewModel.actionData.setValue(new WorkoutsFragmentActionData(WorkoutsFragmentAction.DISPLAY_WORKOUT_DELETE_FAILED, this.profileId, this.workoutId));
+            }
         }
     }
 }

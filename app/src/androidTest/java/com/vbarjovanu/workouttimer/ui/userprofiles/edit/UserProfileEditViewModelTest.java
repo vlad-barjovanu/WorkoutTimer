@@ -9,10 +9,14 @@ import androidx.lifecycle.Observer;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
+import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfilesList;
 import com.vbarjovanu.workouttimer.business.services.generic.FileRepositorySettings;
 import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
+import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesService;
 import com.vbarjovanu.workouttimer.helpers.assets.AssetsFileExporter;
-import com.vbarjovanu.workouttimer.ui.SingleLiveEvent;
+import com.vbarjovanu.workouttimer.session.ApplicationSessionFactory;
+import com.vbarjovanu.workouttimer.session.IApplicationSession;
+import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,6 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -30,6 +35,10 @@ import static org.mockito.Mockito.mock;
 
 public class UserProfileEditViewModelTest {
 
+    @Mock
+    private IUserProfilesService userProfilesService;
+    @Mock
+    private IApplicationSession applicationSession;
     private IUserProfileEditViewModel userProfileEditViewModel;
     private CountDownLatch countDownLatch;
     private Observer<UserProfile> observer;
@@ -37,33 +46,30 @@ public class UserProfileEditViewModelTest {
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Before
-    public void setup() throws IOException {
-        IFileRepositorySettings fileRepoSettings;
-        String filePath = null;
-        String folderPath;
-        String assetPath = "business/services/userprofiles/UserProfiles.json";
+    public void setup() {
 
-        //export workouts-profile file from test assets to local file
-        Context ctx = InstrumentationRegistry.getInstrumentation().getContext();
-        try {
-            File tempFile = folder.newFile("UserProfiles.json");
-            filePath = tempFile.getPath();
-        } catch (IOException e) {
-            Assert.assertNull(e.getMessage(), e);
-        }
-        AssetsFileExporter assetsFileExporter = new AssetsFileExporter(ctx);
-        assetsFileExporter.exportAsset(assetPath, filePath);
-        folderPath = filePath.replace("/UserProfiles.json", "");
-
-        //init workoutslivedata with file repo settings
-        fileRepoSettings = new FileRepositorySettings(folderPath);
-        this.userProfileEditViewModel = new UserProfileEditViewModel((Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext(), fileRepoSettings);
+        this.applicationSession = mock(IApplicationSession.class);
+        this.userProfilesService = mock(IUserProfilesService.class);
         //noinspection unchecked
         this.observer = mock(Observer.class);
+        this.setupMockedAppSession();
+        this.setupMockedUserProfiles();
+        this.userProfileEditViewModel = new UserProfileEditViewModel(this.applicationSession, this.userProfilesService);
         this.userProfileEditViewModel.getUserProfile().observeForever(this.observer);
         //load data and check if observer's onChanged method was triggered
         this.countDownLatch = new CountDownLatch(1);
         this.userProfileEditViewModel.setCountDownLatch(countDownLatch);
+    }
+
+    private void setupMockedAppSession() {
+        Mockito.when(this.applicationSession.getFileRepositoriesFolderPath()).thenReturn(folder.getRoot().getAbsolutePath());
+        Mockito.when(this.applicationSession.getUserProfileId()).thenReturn("123");
+    }
+
+    private void setupMockedUserProfiles() {
+        UserProfile userProfile;
+        userProfile = new UserProfile("abc");
+        Mockito.when(this.userProfilesService.loadModel("abc")).thenReturn(userProfile);
     }
 
     @Rule

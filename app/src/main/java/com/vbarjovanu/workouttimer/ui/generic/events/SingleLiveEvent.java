@@ -1,4 +1,4 @@
-package com.vbarjovanu.workouttimer.ui;
+package com.vbarjovanu.workouttimer.ui.generic.events;
 
 /*
  *  Copyright 2017 Google Inc.

@@ -6,14 +6,15 @@ import android.graphics.Bitmap;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
-import com.vbarjovanu.workouttimer.ui.SingleLiveEvent;
+import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.ISynchronizable;
 
-public abstract class IUserProfileEditViewModel extends AndroidViewModel implements ISynchronizable {
-    IUserProfileEditViewModel(@NonNull Application application) {
-        super(application);
+public abstract class IUserProfileEditViewModel extends ViewModel implements ISynchronizable {
+    IUserProfileEditViewModel() {
+        super();
     }
 
     /**

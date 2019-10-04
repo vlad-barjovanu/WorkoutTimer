@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.vbarjovanu.workouttimer.ui.workouts.edit.WorkoutEditFragment">
+
+    <data>
+
+        <variable
+            name="workout"
+            type="com.vbarjovanu.workouttimer.business.models.workouts.Workout" />
+    </data>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbarStyle="outsideInset"
+        android:scrollbars="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/fragment_workout_edit_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_margin="2pt"
+                android:hint="@string/name"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:text="@={workout.name}"
+                android:textSize="30sp" />
+
+            <EditText
+                android:id="@+id/fragment_workout_edit_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_edit_name"
+                android:layout_margin="2pt"
+                android:hint="@string/workout_description"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:text="@={workout.description}"
+                android:textSize="30sp" />
+
+            <LinearLayout
+                android:id="@+id/fragment_workout_linearlayout_prepare"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_edit_description">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/prepare_duration"
+                    android:src="@mipmap/prepare" />
+
+                <EditText
+                    android:id="@+id/fragment_workout_edit_prepare_duration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2pt"
+                    android:layout_weight="5"
+                    android:ems="10"
+                    android:hint="@string/prepare_duration"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text="@={com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter.integerToString(workout.prepareDuration)}"
+                    android:textSize="30sp" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/fragment_workout_edit_work_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_linearlayout_prepare"
+                android:layout_margin="2pt"
+                android:ems="10"
+                android:hint="@string/work_description"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:text="@={workout.workDescription}"
+                android:textSize="30sp" />
+
+            <LinearLayout
+                android:id="@+id/fragment_workout_linearlayout_work"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_edit_work_description">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/work_duration"
+                    android:src="@mipmap/work" />
+
+                <EditText
+                    android:id="@+id/fragment_workout_edit_work_duration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2pt"
+                    android:layout_weight="5"
+                    android:ems="10"
+                    android:hint="@string/work_duration"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text="@={com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter.integerToString(workout.workDuration)}"
+                    android:textSize="30sp" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/fragment_workout_edit_rest_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_linearlayout_work"
+                android:layout_margin="2pt"
+                android:ems="10"
+                android:hint="@string/rest_description"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:text="@={workout.restDescription}"
+                android:textSize="30sp" />
+
+            <LinearLayout
+                android:id="@+id/fragment_workout_linearlayout_rest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_edit_rest_description">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/rest_duration"
+                    android:src="@mipmap/rest" />
+
+                <EditText
+                    android:id="@+id/fragment_workout_edit_rest_duration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2pt"
+                    android:layout_weight="5"
+                    android:ems="10"
+                    android:hint="@string/rest_duration"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text="@={com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter.integerToString(workout.restDuration)}"
+                    android:textSize="30sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fragment_workout_linearlayout_cycles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_linearlayout_rest">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/cycles_count"
+                    android:src="@mipmap/cycles" />
+
+                <EditText
+                    android:id="@+id/fragment_workout_edit_cycles_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2pt"
+                    android:layout_weight="5"
+                    android:ems="10"
+                    android:hint="@string/cycles_count"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text="@={com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter.integerToString(workout.cyclesCount)}"
+                    android:textSize="30sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fragment_workout_linearlayout_sets"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_linearlayout_cycles">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/sets_count"
+                    android:src="@mipmap/sets" />
+
+                <EditText
+                    android:id="@+id/fragment_workout_edit_sets_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2pt"
+                    android:layout_weight="5"
+                    android:ems="10"
+                    android:hint="@string/sets_count"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text="@={com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter.integerToString(workout.setsCount)}"
+                    android:textSize="30sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fragment_workout_linearlayout_sets_rest_duration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_linearlayout_sets">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/rest_between_sets_duration"
+                    android:src="@mipmap/rest" />
+
+                <EditText
+                    android:id="@+id/fragment_workout_edit_sets_rest_duration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2pt"
+                    android:layout_weight="5"
+                    android:ems="10"
+                    android:hint="@string/rest_between_sets_duration"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text="@={com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter.integerToString(workout.restBetweenSetsDuration)}"
+                    android:textSize="30sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fragment_workout_linearlayout_cooldown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fragment_workout_linearlayout_sets_rest_duration">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/cool_down_duration"
+                    android:src="@mipmap/cool_down" />
+
+                <EditText
+                    android:id="@+id/fragment_workout_edit_cool_down_duration"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2pt"
+                    android:layout_weight="5"
+                    android:ems="10"
+                    android:hint="@string/cool_down_duration"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:text="@={com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter.integerToString(workout.coolDownDuration)}"
+                    android:textSize="30sp" />
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+</layout>

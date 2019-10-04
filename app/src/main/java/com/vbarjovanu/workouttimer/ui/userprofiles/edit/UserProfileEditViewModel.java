@@ -1,6 +1,5 @@
 package com.vbarjovanu.workouttimer.ui.userprofiles.edit;
 
-import android.app.Application;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -10,26 +9,27 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
-import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySettings;
 import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesService;
 import com.vbarjovanu.workouttimer.business.services.userprofiles.UserProfilesFactory;
 import com.vbarjovanu.workouttimer.helpers.files.BitmapFileWriter;
-import com.vbarjovanu.workouttimer.ui.SingleLiveEvent;
-import com.vbarjovanu.workouttimer.ui.generic.viewmodels.ISynchronizable;
+import com.vbarjovanu.workouttimer.session.IApplicationSession;
+import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
 public class UserProfileEditViewModel extends IUserProfileEditViewModel {
     private MutableLiveData<UserProfile> userProfileEditLiveData;
-    private final IFileRepositorySettings fileRepositorySettings;
+    private final IUserProfilesService userProfilesService;
+    private final IApplicationSession applicationSession;
     private SingleLiveEvent<UserProfileEditFragmentAction> action;
     private CountDownLatch countDownLatch;
 
-    public UserProfileEditViewModel(@NonNull Application application, IFileRepositorySettings fileRepositorySettings) {
-        super(application);
+    public UserProfileEditViewModel(@NonNull IApplicationSession applicationSession, IUserProfilesService userProfilesService) {
+        super();
+        this.applicationSession = applicationSession;
+        this.userProfilesService = userProfilesService;
         this.userProfileEditLiveData = new MutableLiveData<>();
-        this.fileRepositorySettings = fileRepositorySettings;
         this.action = new SingleLiveEvent<>();
     }
 
@@ -60,7 +60,7 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
             userProfile.setDescription(description);
             if (newImageBitmap != null) {
                 BitmapFileWriter bitmapFileWriter = new BitmapFileWriter();
-                filePath = this.fileRepositorySettings.getFolderPath() + "/images/" + userProfile.getId() + ".png";
+                filePath = this.userProfilesService.getImagesFolderPath() + userProfile.getId() + ".png";
                 try {
                     bitmapFileWriter.writeFile(filePath, newImageBitmap, Bitmap.CompressFormat.PNG, 100);
                 } catch (IOException e) {
@@ -104,8 +104,7 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
             String userProfileId = strings[0];
 
             Log.v("loaddata", "doInBackground");
-            IUserProfilesService userProfilesService = UserProfilesFactory.getUserProfilesService(this.userProfileEditViewModel.fileRepositorySettings);
-            data = userProfilesService.loadModel(userProfileId);
+            data = this.userProfileEditViewModel.userProfilesService.loadModel(userProfileId);
             return data;
         }
 
@@ -129,9 +128,8 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
             UserProfile userProfile;
 
             Log.v("savedata", "doInBackground");
-            IUserProfilesService userProfilesService = UserProfilesFactory.getUserProfilesService(this.userProfileEditViewModel.fileRepositorySettings);
             userProfile = data[0];
-            userProfilesService.saveModel(userProfile);
+            this.userProfileEditViewModel.userProfilesService.saveModel(userProfile);
             return userProfile;
         }
 

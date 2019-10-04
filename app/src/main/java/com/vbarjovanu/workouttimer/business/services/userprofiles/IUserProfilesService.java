@@ -26,11 +26,31 @@ public interface IUserProfilesService extends IModelsService<UserProfile, UserPr
     boolean saveModel(UserProfile userProfile);
 
     /**
+     * Deletes a user profile identified by the ID
+     * @param userProfileId ID of the user profile to delete
+     * @return true if the model was deleted successfully
+     */
+    boolean deleteModel(String userProfileId);
+
+    /**
+     * Deletes the user profile
+     * @param userProfile user profile to delete
+     * @return true if the model was deleted successfully
+     */
+    boolean deleteModel(UserProfile userProfile);
+
+    /**
      * Creates a default user profile
      * @return user profile
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
-     * @throws InstantiationException
+     * @throws IllegalAccessException can't call constructor for new model
+     * @throws InvocationTargetException constructor call for new model fails
+     * @throws InstantiationException constructor call for new model fails
      */
     UserProfile createDefaultModel() throws IllegalAccessException, InvocationTargetException, InstantiationException;
+
+    /**
+     * Returns the folder path where user profile images are stored
+     * @return folder path
+     */
+    String getImagesFolderPath();
 }

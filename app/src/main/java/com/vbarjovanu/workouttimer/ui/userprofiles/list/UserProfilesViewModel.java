@@ -14,22 +14,25 @@ import com.vbarjovanu.workouttimer.business.services.generic.IFileRepositorySett
 import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesService;
 import com.vbarjovanu.workouttimer.business.services.userprofiles.UserProfilesFactory;
 import com.vbarjovanu.workouttimer.session.ApplicationSessionFactory;
-import com.vbarjovanu.workouttimer.ui.SingleLiveEvent;
+import com.vbarjovanu.workouttimer.session.IApplicationSession;
+import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 
 import java.util.concurrent.CountDownLatch;
 
 public class UserProfilesViewModel extends IUserProfilesViewModel {
 
-    private final IFileRepositorySettings fileRepositorySettings;
+    private final IApplicationSession applicationSession;
+    private final IUserProfilesService userProfilesService;
     private CountDownLatch countDownLatch;
     private MutableLiveData<UserProfilesList> userProfilesLiveData;
     private SingleLiveEvent<UserProfilesFragmentActionData> actionData;
 
     private String selectedUserProfileId;
 
-    public UserProfilesViewModel(@NonNull Application application, IFileRepositorySettings fileRepositorySettings) {
-        super(application);
-        this.fileRepositorySettings = fileRepositorySettings;
+    public UserProfilesViewModel(@NonNull IApplicationSession applicationSession, @NonNull IUserProfilesService userProfilesService) {
+        super();
+        this.applicationSession = applicationSession;
+        this.userProfilesService = userProfilesService;
         this.userProfilesLiveData = new MutableLiveData<>();
         this.actionData = new SingleLiveEvent<>();
     }
@@ -52,7 +55,7 @@ public class UserProfilesViewModel extends IUserProfilesViewModel {
         }
         if (userProfile != null) {
             this.selectedUserProfileId = id;
-            ApplicationSessionFactory.getApplicationSession(this.getApplication()).setUserProfileId(this.selectedUserProfileId);
+            this.applicationSession.setUserProfileId(this.selectedUserProfileId);
             this.actionData.setValue(new UserProfilesFragmentActionData(UserProfilesFragmentAction.GOTO_HOME));
             return true;
         }
@@ -113,8 +116,7 @@ public class UserProfilesViewModel extends IUserProfilesViewModel {
             String profileId;
 
             Log.v("loaddata", "doInBackground");
-            IUserProfilesService userProfilesService = UserProfilesFactory.getUserProfilesService(this.userProfilesViewModel.fileRepositorySettings);
-            data = userProfilesService.loadModels();
+            data = this.userProfilesViewModel.userProfilesService.loadModels();
             return data;
         }
 

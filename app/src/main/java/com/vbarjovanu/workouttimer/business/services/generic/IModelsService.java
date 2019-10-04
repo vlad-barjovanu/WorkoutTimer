@@ -27,6 +27,21 @@ public interface IModelsService<T extends IModel<T>, Z extends ModelsList<T>> {
     boolean saveModel(String profileId, T model);
 
     /**
+     * Deletes a model identified by the PK
+     * @param profileId user's profile ID
+     * @param primaryKey models's ID
+     * @return true if the model was deleted successfully
+     */
+    boolean deleteModel(String profileId, String primaryKey);
+    /**
+     * Deletes the model
+     * @param profileId user's profile ID
+     * @param model model to delete
+     * @return true if the model was deleted successfully
+     */
+    boolean deleteModel(String profileId, T model);
+
+    /**
      * Creates a model and initializes the primary key
      * @return the created model
      */

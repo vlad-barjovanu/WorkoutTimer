@@ -76,6 +76,31 @@ public class ModelsService<T extends IModel<T>, Z extends ModelsList<T>> impleme
     }
 
     @Override
+    public boolean deleteModel(String profileId, T model) {
+        if (model != null) {
+            return this.deleteModel(profileId, model.getPrimaryKey());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteModel(String profileId, String primaryKey) {
+        Z models = this.loadModels(profileId);
+        T model = models.find(primaryKey);
+        if (model != null && models.remove(model)) {
+            try {
+                //noinspection unchecked
+                this.modelsFileRepository.saveModelsToFile(this.getFilePath(profileId), models.toArray((T[]) Array.newInstance(this.classT, 0)));
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public T createModel() throws InstantiationException, IllegalAccessException, InvocationTargetException {
         T model;
         Constructor<T> constructor = null;
