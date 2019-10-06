@@ -18,6 +18,8 @@ import com.vbarjovanu.workouttimer.session.ApplicationSessionFactory;
 import com.vbarjovanu.workouttimer.session.IApplicationSession;
 import com.vbarjovanu.workouttimer.ui.colors.ColorsPickerViewModel;
 import com.vbarjovanu.workouttimer.ui.colors.IColorsPickerViewModel;
+import com.vbarjovanu.workouttimer.ui.home.HomeViewModel;
+import com.vbarjovanu.workouttimer.ui.home.IHomeViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.edit.IUserProfileEditViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.list.IUserProfilesViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.edit.UserProfileEditViewModel;
@@ -31,7 +33,7 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
     private IFileRepositorySettings fileRepositorySettings;
     private Application application;
 
-    public static CustomViewModelFactory getInstance(@NonNull Application application){
+    public static CustomViewModelFactory getInstance(@NonNull Application application) {
         String folderPath = ApplicationSessionFactory.getApplicationSession(application.getApplicationContext()).getFileRepositoriesFolderPath();
         return new CustomViewModelFactory(application, new FileRepositorySettings(folderPath));
     }
@@ -41,15 +43,15 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
         this.application = application;
     }
 
-    private IApplicationSession getApplicationSession(){
+    private IApplicationSession getApplicationSession() {
         return ApplicationSessionFactory.getApplicationSession(this.application.getApplicationContext());
     }
 
-    private IWorkoutsService getWorkoutsService(){
+    private IWorkoutsService getWorkoutsService() {
         return WorkoutsFactory.getWorkoutsService(this.fileRepositorySettings);
     }
 
-    private IUserProfilesService getUserProfilesService(){
+    private IUserProfilesService getUserProfilesService() {
         return UserProfilesFactory.getUserProfilesService(this.fileRepositorySettings);
     }
 
@@ -77,9 +79,13 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
             //noinspection unchecked
             return (T) new UserProfileEditViewModel(this.getApplicationSession(), this.getUserProfilesService());
         }
-        if(modelClass.isAssignableFrom(IColorsPickerViewModel.class)){
+        if (modelClass.isAssignableFrom(IColorsPickerViewModel.class)) {
             //noinspection unchecked
             return (T) new ColorsPickerViewModel();
+        }
+        if (modelClass.isAssignableFrom(IHomeViewModel.class)) {
+            //noinspection unchecked
+            return (T) new HomeViewModel(this.application, this.getApplicationSession(), this.getWorkoutsService(), this.getUserProfilesService());
         }
         try {
             return modelClass.newInstance();

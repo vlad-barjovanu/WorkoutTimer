@@ -1,19 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.vbarjovanu.workouttimer.ui.workouts.edit.WorkoutEditFragment">
 
-    <TextView
-        android:id="@+id/text_home"
+    <data>
+
+        <import type="com.vbarjovanu.workouttimer.ui.home.HomeModel" />
+
+        <import type="com.vbarjovanu.workouttimer.ui.home.IHomeFragmentClickListeners" />
+
+        <variable
+            name="homeModel"
+            type="HomeModel" />
+
+        <variable
+            name="clickListners"
+            type="IHomeFragmentClickListeners" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/fragment_home_textview_welcome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:text="@{homeModel.welcomeText}"
+            android:onClick="@{(v)->clickListners.onWelcomeTextClick(v)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/fragment_home_linearlayout_workouts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/fragment_home_textview_welcome">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/work"
+                android:contentDescription="@string/workout" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textSize="20sp"
+                android:text="@{homeModel.workoutsCountText}"
+                android:onClick="@{(v)->clickListners.onWorkoutsClick(v)}" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/fragment_home_linearlayout_sequences"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/fragment_home_linearlayout_workouts">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/cycles"
+                android:contentDescription="@string/sequences" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:textSize="20sp"
+                android:text="@{homeModel.sequencesCountText}"
+                android:onClick="@{(v)->clickListners.onSequencesClick(v)}" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -170,4 +170,9 @@ public class WorkoutsServiceTest {
         verify(this.workoutsFileRepository, times(0)).loadModelsFromFile(any(String.class));
         verify(this.workoutsFileRepository, times(0)).saveModelsToFile(any(String.class), any(Workout[].class));
     }
+
+    @Test
+    public void getWorkoutsCount() {
+        assertEquals(2, this.workoutsService.getWorkoutsCount("profile123"));
+    }
 }

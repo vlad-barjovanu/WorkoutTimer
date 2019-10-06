@@ -10,7 +10,7 @@ import com.vbarjovanu.workouttimer.business.services.generic.ModelsService;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 
-public class WorkoutsService extends ModelsService<Workout, WorkoutsList> implements IWorkoutsService{
+public class WorkoutsService extends ModelsService<Workout, WorkoutsList> implements IWorkoutsService {
     WorkoutsService(IWorkoutsFileRepository workoutsFileRepository, IFileRepositorySettings modelsFileRepositorySettings, Class<Workout> classT, Class<WorkoutsList> classZ) {
         super(workoutsFileRepository, modelsFileRepositorySettings, classT, classZ);
     }
@@ -19,9 +19,14 @@ public class WorkoutsService extends ModelsService<Workout, WorkoutsList> implem
     public Workout createModel() throws InstantiationException, IllegalAccessException, InvocationTargetException {
         int[] colors = this.getPossibleColors();
         int color = colors[new Random().nextInt(colors.length)];
-        Workout workout= super.createModel();
+        Workout workout = super.createModel();
         workout.setColor(color);
         return workout;
+    }
+
+    public int getWorkoutsCount(String profileId) {
+        WorkoutsList list = this.loadModels(profileId);
+        return (list != null) ? list.size() : 0;
     }
 
     @Override

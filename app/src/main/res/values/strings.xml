@@ -41,4 +41,10 @@
     <string name="message_no_workouts_are_defined">No workouts are defined yet. Add one to begin with!</string>
     <string name="message_pick_a_color">Choose a color</string>
     <string name="select">Select</string>
+    <string name="sequences">Sequences</string>
+    <string name="message_home_fragment_workouts">You have %d workouts</string>
+    <string name="message_home_fragment_sequences">You have %d sequences</string>
+    <string name="message_home_fragment_no_workouts">You have no workouts yet. Add a new workout</string>
+    <string name="message_home_fragment_no_sequences">You have no sequences yet. Add a new sequence</string>
+    <string name="message_home_fragment_welcome">Welcome %s</string>
 </resources>

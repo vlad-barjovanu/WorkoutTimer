@@ -5,31 +5,76 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
+import com.vbarjovanu.workouttimer.IMainActivityViewModel;
 import com.vbarjovanu.workouttimer.R;
+import com.vbarjovanu.workouttimer.databinding.FragmentHomeBinding;
+import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
+import com.vbarjovanu.workouttimer.ui.workouts.list.WorkoutsFragment;
 
-public class HomeFragment extends Fragment {
+import java.util.Objects;
 
-    private HomeViewModel homeViewModel;
+public class HomeFragment extends Fragment implements IHomeFragmentClickListeners {
+
+    private IHomeViewModel homeViewModel;
+    private IMainActivityViewModel mainActivityViewModel;
+    private FragmentHomeBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel =
-                ViewModelProviders.of(this).get(HomeViewModel.class);
+        Objects.requireNonNull(this.getActivity(), "Activity must be not null");
+        this.homeViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IHomeViewModel.class);
+        this.mainActivityViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
-        final TextView textView = root.findViewById(R.id.text_home);
-        homeViewModel.getText().observe(this, new Observer<String>() {
+        this.binding = FragmentHomeBinding.bind(root);
+        this.binding.setClickListners(this);
+        homeViewModel.getHomeModel().observe(this, new Observer<HomeModel>() {
             @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
+            public void onChanged(HomeModel homeModel) {
+                HomeFragment.this.onHomeModelChanged(homeModel);
             }
         });
         return root;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        this.mainActivityViewModel.showSaveEntityButton(false);
+        this.mainActivityViewModel.showNewEntityButton(false);
+        this.homeViewModel.loadData();
+    }
+
+    private void onHomeModelChanged(HomeModel homeModel) {
+        this.binding.setHomeModel(homeModel);
+    }
+
+    @Override
+    public void onWorkoutsClick(View view) {
+        Objects.requireNonNull(HomeFragment.this.getActivity(), "Activity must be not null");
+        NavController navController = Navigation.findNavController(HomeFragment.this.getActivity(), R.id.nav_host_fragment);
+        navController.navigate(R.id.action_nav_home_to_nav_workouts);
+    }
+
+    @Override
+    public void onSequencesClick(View view) {
+        //TODO implement navigation to sequences
+        Toast.makeText(getContext(), "Go to sequences", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onWelcomeTextClick(View view) {
+        Objects.requireNonNull(HomeFragment.this.getActivity(), "Activity must be not null");
+        NavController navController = Navigation.findNavController(HomeFragment.this.getActivity(), R.id.nav_host_fragment);
+        navController.navigate(R.id.action_nav_home_to_nav_userprofiles);
     }
 }
