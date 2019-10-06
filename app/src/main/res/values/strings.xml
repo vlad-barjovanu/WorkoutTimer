@@ -39,4 +39,6 @@
     <string name="cool_down_duration">Cool down duration</string>
     <string name="edit_workout">Edit workout</string>
     <string name="message_no_workouts_are_defined">No workouts are defined yet. Add one to begin with!</string>
+    <string name="message_pick_a_color">Choose a color</string>
+    <string name="select">Select</string>
 </resources>

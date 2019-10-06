@@ -8,6 +8,9 @@
         <variable
             name="workout"
             type="com.vbarjovanu.workouttimer.business.models.workouts.Workout" />
+        <variable
+            name="clickListners"
+            type="com.vbarjovanu.workouttimer.ui.workouts.edit.WorkoutEditFragmentClickListners" />
     </data>
 
 
@@ -259,6 +262,14 @@
                     android:text="@={com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter.integerToString(workout.coolDownDuration)}"
                     android:textSize="30sp" />
             </LinearLayout>
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_below="@id/fragment_workout_linearlayout_cooldown"
+                android:background="@{workout.color}"
+                android:onClick="@{(v)->clickListners.onImageViewColorClick(v)}"
+                android:contentDescription="@string/message_pick_a_color" />
         </RelativeLayout>
     </ScrollView>
 

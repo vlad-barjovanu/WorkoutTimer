@@ -26,4 +26,6 @@ public abstract class IWorkoutEditViewModel extends ViewModel implements ISynchr
     abstract void cancelWorkoutEdit();
 
     abstract SingleLiveEvent<WorkoutEditFragmentAction> getAction();
+
+    abstract int[] getWorkoutPossibleColors();
 }

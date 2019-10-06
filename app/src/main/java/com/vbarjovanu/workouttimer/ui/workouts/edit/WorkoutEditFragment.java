@@ -1,6 +1,7 @@
 package com.vbarjovanu.workouttimer.ui.workouts.edit;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +20,13 @@ import com.vbarjovanu.workouttimer.MainActivityActionData;
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.business.models.workouts.Workout;
 import com.vbarjovanu.workouttimer.databinding.FragmentWorkoutEditBinding;
+import com.vbarjovanu.workouttimer.ui.colors.ColorsPickerDialogFragment;
 import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 
-public class WorkoutEditFragment extends Fragment {
+import java.util.Objects;
+
+public class WorkoutEditFragment extends Fragment implements WorkoutEditFragmentClickListners {
 
     private IWorkoutEditViewModel workoutEditViewModel;
     private IMainActivityViewModel mainActivityViewModel;
@@ -46,6 +50,7 @@ public class WorkoutEditFragment extends Fragment {
 
             root = inflater.inflate(R.layout.fragment_workout_edit, container, false);
             this.binding = FragmentWorkoutEditBinding.bind(root);
+            this.binding.setClickListners(this);
             if (this.getArguments() != null && this.getArguments().containsKey("workoutId")) {
                 String workoutId = this.getArguments().getString("workoutId");
                 if (workoutId == null) {
@@ -156,6 +161,32 @@ public class WorkoutEditFragment extends Fragment {
         if (this.getContext() != null && this.getView() != null) {
             InputMethodManager imm = (InputMethodManager) this.getContext().getSystemService(Activity.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(this.getView().getWindowToken(), 0);
+        }
+    }
+
+    @Override
+    public void onImageViewColorClick(View view) {
+        final Workout workout;
+        Objects.requireNonNull(getFragmentManager(), "FragmentManager must be not null");
+        final ColorsPickerDialogFragment dialog = new ColorsPickerDialogFragment();
+        Bundle arguments = new Bundle(1);
+        workout = this.workoutEditViewModel.getWorkout().getValue();
+        if (workout != null) {
+            arguments.putIntArray("colors", this.workoutEditViewModel.getWorkoutPossibleColors());
+            arguments.putInt("color", workout.getColor());
+            dialog.setArguments(arguments);
+            dialog.show(getFragmentManager(), "ColorsPickerDialogFragment");
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dlg) {
+                    if (dialog.getArguments() != null) {
+                        int color = dialog.getArguments().getInt("color");
+                        workout.setColor(color);
+                        WorkoutEditFragment.this.binding.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.workout);
+                        WorkoutEditFragment.this.binding.invalidateAll();
+                    }
+                }
+            });
         }
     }
 }

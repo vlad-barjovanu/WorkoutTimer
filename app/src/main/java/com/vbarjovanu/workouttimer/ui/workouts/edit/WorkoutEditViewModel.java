@@ -85,6 +85,11 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
     }
 
     @Override
+    int[] getWorkoutPossibleColors() {
+        return this.workoutsService.getPossibleColors();
+    }
+
+    @Override
     public void setCountDownLatch(CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }

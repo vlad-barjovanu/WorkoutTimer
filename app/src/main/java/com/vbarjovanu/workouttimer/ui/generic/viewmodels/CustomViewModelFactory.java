@@ -16,6 +16,8 @@ import com.vbarjovanu.workouttimer.business.services.workouts.IWorkoutsService;
 import com.vbarjovanu.workouttimer.business.services.workouts.WorkoutsFactory;
 import com.vbarjovanu.workouttimer.session.ApplicationSessionFactory;
 import com.vbarjovanu.workouttimer.session.IApplicationSession;
+import com.vbarjovanu.workouttimer.ui.colors.ColorsPickerViewModel;
+import com.vbarjovanu.workouttimer.ui.colors.IColorsPickerViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.edit.IUserProfileEditViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.list.IUserProfilesViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.edit.UserProfileEditViewModel;
@@ -74,6 +76,10 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(IUserProfileEditViewModel.class)) {
             //noinspection unchecked
             return (T) new UserProfileEditViewModel(this.getApplicationSession(), this.getUserProfilesService());
+        }
+        if(modelClass.isAssignableFrom(IColorsPickerViewModel.class)){
+            //noinspection unchecked
+            return (T) new ColorsPickerViewModel();
         }
         try {
             return modelClass.newInstance();
