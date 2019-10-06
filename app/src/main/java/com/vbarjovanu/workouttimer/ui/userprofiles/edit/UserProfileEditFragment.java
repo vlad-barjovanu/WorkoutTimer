@@ -27,6 +27,7 @@ import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 
 import java.io.File;
+import java.util.Objects;
 
 public class UserProfileEditFragment extends Fragment implements Observer<UserProfile>, View.OnClickListener {
     private IUserProfileEditViewModel userProfileEditViewModel;
@@ -40,12 +41,14 @@ public class UserProfileEditFragment extends Fragment implements Observer<UserPr
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        Objects.requireNonNull(this.getActivity(), "Activity must be not null");
         this.userProfileEditViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IUserProfileEditViewModel.class);
         this.userProfileEditViewModel.getUserProfile().observe(this, this);
         this.userProfileEditViewModel.getAction().observe(this, new Observer<UserProfileEditFragmentAction>() {
             @Override
             public void onChanged(UserProfileEditFragmentAction userProfileEditFragmentAction) {
                 NavController navController = Navigation.findNavController(UserProfileEditFragment.this.getActivity(), R.id.nav_host_fragment);
+                //noinspection SwitchStatementWithTooFewBranches
                 switch (userProfileEditFragmentAction) {
                     case GOTO_USERPROFILES:
                         navController.popBackStack(R.id.nav_userprofiles, false);
@@ -73,7 +76,7 @@ public class UserProfileEditFragment extends Fragment implements Observer<UserPr
     public void onChanged(UserProfile userProfile) {
         String name = "";
         String description = "";
-        Integer resourceId = R.mipmap.userprofile;
+        Integer resourceId = R.drawable.userprofile;
 
         if (userProfile != null) {
             name = userProfile.getName();

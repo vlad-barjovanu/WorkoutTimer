@@ -55,7 +55,7 @@ public class UserProfilesAdapter extends RecyclerView.Adapter<UserProfilesAdapte
         UserProfile userProfile = this.userProfilesList.get(position);
         String title = "";
         String description = "";
-        Integer resourceId = R.mipmap.userprofile;
+        Integer resourceId = R.drawable.userprofile;
 
         if (userProfile != null) {
             title = (userProfile.getName() != null) ? userProfile.getName() : "";
