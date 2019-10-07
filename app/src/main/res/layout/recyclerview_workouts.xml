@@ -48,8 +48,8 @@
 
                 <ImageButton
                     android:id="@+id/recyclerview_workouts_button_play"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_toStartOf="@id/recyclerview_workouts_button_menu"
                     android:contentDescription="@string/start_workout"
                     android:onClick="@{(v)->item.onClick(item, v)}"
@@ -57,8 +57,8 @@
 
                 <Button
                     android:id="@+id/recyclerview_workouts_button_menu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     android:layout_alignParentEnd="true"
                     android:onClick="@{(v)->item.onClick(item, v)}"
                     android:text="@string/three_vertical_dots" />

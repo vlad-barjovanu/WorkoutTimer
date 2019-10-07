@@ -73,17 +73,23 @@ public class UserProfilesViewModel extends IUserProfilesViewModel {
     }
 
     @Override
-    boolean editUserProfileId(String id) {
+    boolean editUserProfile(String id) {
         UserProfile userProfile = null;
         if (this.userProfilesLiveData.getValue() != null) {
             userProfile = this.userProfilesLiveData.getValue().find(id);
         }
 
-        if( userProfile != null){
+        if (userProfile != null) {
             this.actionData.setValue(new UserProfilesFragmentActionData(UserProfilesFragmentAction.GOTO_USERPROFILE_EDIT, userProfile.getId()));
             return true;
         }
         return false;
+    }
+
+    @Override
+    boolean newUserProfile() {
+        this.actionData.setValue(new UserProfilesFragmentActionData(UserProfilesFragmentAction.GOTO_USERPROFILE_NEW, null));
+        return true;
     }
 
     @Override
@@ -92,7 +98,7 @@ public class UserProfilesViewModel extends IUserProfilesViewModel {
     }
 
     private void decreaseCountDownLatch() {
-        if(this.countDownLatch!=null) {
+        if (this.countDownLatch != null) {
             this.countDownLatch.countDown();
         }
     }
@@ -102,12 +108,6 @@ public class UserProfilesViewModel extends IUserProfilesViewModel {
 
         LoadAsyncTask(UserProfilesViewModel userProfilesViewModel) {
             this.userProfilesViewModel = userProfilesViewModel;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            Log.v("loaddata", "preexecute");
-            super.onPreExecute();
         }
 
         @Override

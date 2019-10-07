@@ -33,7 +33,7 @@ public class HomeFragment extends Fragment implements IHomeFragmentClickListener
                              ViewGroup container, Bundle savedInstanceState) {
         Objects.requireNonNull(this.getActivity(), "Activity must be not null");
         this.homeViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IHomeViewModel.class);
-        this.mainActivityViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
+        this.mainActivityViewModel = ViewModelProviders.of(this.getActivity(), CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         this.binding = FragmentHomeBinding.bind(root);
         this.binding.setClickListners(this);

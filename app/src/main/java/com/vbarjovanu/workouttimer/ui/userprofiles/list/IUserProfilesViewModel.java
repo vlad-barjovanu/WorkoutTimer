@@ -54,5 +54,11 @@ public abstract class IUserProfilesViewModel extends ViewModel implements ISynch
      * @param id of the user profile to edit
      * @return true if user profile can be edited
      */
-    abstract boolean editUserProfileId(String id);
+    abstract boolean editUserProfile(String id);
+
+    /**
+     * Starts editing a new user profile
+     * @return true if a new user profile can be edited
+     */
+    abstract boolean newUserProfile();
 }

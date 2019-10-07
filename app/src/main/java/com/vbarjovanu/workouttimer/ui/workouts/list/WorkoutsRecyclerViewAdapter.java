@@ -37,23 +37,27 @@ public class WorkoutsRecyclerViewAdapter extends RecyclerViewAdapter<Workout, Wo
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        WorkoutsRecyclerViewItemAction action = null;
-                        switch (item.getItemId()) {
-                            case R.id.workout_edit:
-                                action = WorkoutsRecyclerViewItemAction.WORKOUT_EDIT;
-                                break;
-                            case R.id.workout_delete:
-                                action = WorkoutsRecyclerViewItemAction.WORKOUT_DELETE;
-                                break;
-                        }
-                        triggerItemAction(action, itemModel.getId());
-                        return true;
+                        return WorkoutsRecyclerViewAdapter.this.onMenuItemClick(item, itemModel);
                     }
                 });
                 //displaying the popup
                 popup.show();
                 break;
         }
+    }
+
+    private boolean onMenuItemClick(MenuItem item, ItemModel itemModel) {
+        WorkoutsRecyclerViewItemAction action = null;
+        switch (item.getItemId()) {
+            case R.id.workout_edit:
+                action = WorkoutsRecyclerViewItemAction.WORKOUT_EDIT;
+                break;
+            case R.id.workout_delete:
+                action = WorkoutsRecyclerViewItemAction.WORKOUT_DELETE;
+                break;
+        }
+        triggerItemAction(action, itemModel.getId());
+        return true;
     }
 
     @Override

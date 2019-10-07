@@ -24,6 +24,11 @@ public abstract class IUserProfileEditViewModel extends ViewModel implements ISy
     abstract void loadUserProfile(String userProfileId);
 
     /**
+     * Creates a new user profile to be edited
+     */
+    abstract void newUserProfile();
+
+    /**
      * Returns the user profile to edit
      * @return user profile live data
      */

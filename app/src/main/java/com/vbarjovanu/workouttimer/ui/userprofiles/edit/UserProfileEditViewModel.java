@@ -16,6 +16,7 @@ import com.vbarjovanu.workouttimer.session.IApplicationSession;
 import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CountDownLatch;
 
 public class UserProfileEditViewModel extends IUserProfileEditViewModel {
@@ -39,6 +40,17 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
 
         asyncTask = new LoadAsyncTask(this);
         asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, userProfileId);
+    }
+
+    @Override
+    void newUserProfile() {
+        UserProfile userProfile;
+        try {
+            userProfile = this.userProfilesService.createModel();
+            this.userProfileEditLiveData.setValue(userProfile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -67,7 +67,11 @@ public class UserProfileEditFragment extends Fragment implements Observer<UserPr
         this.buttonCancel.setOnClickListener(this);
         if (this.getArguments() != null && this.getArguments().containsKey("userProfileId")) {
             String userProfileId = this.getArguments().getString("userProfileId");
-            this.userProfileEditViewModel.loadUserProfile(userProfileId);
+            if (userProfileId != null) {
+                this.userProfileEditViewModel.loadUserProfile(userProfileId);
+            } else {
+                this.userProfileEditViewModel.newUserProfile();
+            }
         }
         return root;
     }

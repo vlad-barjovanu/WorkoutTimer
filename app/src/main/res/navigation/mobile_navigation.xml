@@ -19,7 +19,7 @@
             android:id="@+id/action_nav_home_to_nav_userprofiles"
             app:destination="@id/nav_userprofiles"
             app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_enter_anim" />
+            app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <fragment

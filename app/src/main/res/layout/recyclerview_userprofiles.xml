@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.vbarjovanu.workouttimer.ui.workouts.edit.WorkoutEditFragment">
+
+    <data>
+
+        <import type="com.vbarjovanu.workouttimer.ui.userprofiles.list.UserProfileItemModel" />
+
+        <variable
+            name="item"
+            type="UserProfileItemModel" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/recyclerview_userprofiles_cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:onClick="@{(v)->item.onClick(item, v)}"
+        app:cardCornerRadius="@dimen/activity_vertical_margin"
+        app:cardElevation="@dimen/activity_vertical_margin">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/recyclerview_userprofiles_imageView"
+                android:layout_width="50pt"
+                android:layout_height="50pt"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginEnd="16dp"
+                app:imageBitmap="@{item.userImage}"
+                android:contentDescription="@string/image" />
+
+            <TextView
+                android:id="@+id/recyclerview_userprofiles_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@id/recyclerview_userprofiles_imageView"
+                android:text="@{item.title}"
+                android:textSize="30sp" />
+            <Button
+                android:id="@+id/recyclerview_userprofiles_button_menu"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:onClick="@{(v)->item.onClick(item, v)}"
+                android:text="@string/three_vertical_dots" />
+
+            <TextView
+                android:id="@+id/recyclerview_userprofiles_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/recyclerview_userprofiles_title"
+                android:layout_toEndOf="@id/recyclerview_userprofiles_imageView"
+                android:text="@{item.description}" />
+
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+</layout>

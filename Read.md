@@ -3,12 +3,14 @@ Recylcerview
     https://developer.android.com/guide/topics/ui/layout/recyclerview
 Recylcerview databinding
     https://medium.com/androiddevelopers/android-data-binding-recyclerview-db7c40d9f0e4
-Databinding
+Data binding
     https://developer.android.com/topic/libraries/data-binding/start.html
     https://medium.com/androiddevelopers/android-data-binding-2-way-your-way-ccac20f6313
     https://developer.android.com/topic/libraries/data-binding/generated-binding
     https://developer.android.com/topic/libraries/data-binding/expressions.html
-Databinding listener events
+Data binding adapters
+    https://developer.android.com/topic/libraries/data-binding/binding-adapters#java
+Data binding listener events
     https://medium.com/androiddevelopers/android-data-binding-the-big-event-2697089dd0d7
 Databinding validator
     https://github.com/Ilhasoft/data-binding-validator 

@@ -166,6 +166,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void onModelChanged(MainActivityModel mainActivityModel) {
         this.activityMainBinding.setMainActivityModel(mainActivityModel);
+        this.activityMainBinding.notifyPropertyChanged(BR.mainActivityModel);
+        this.activityMainBinding.invalidateAll();
         this.invalidateOptionsMenu();
     }
 
