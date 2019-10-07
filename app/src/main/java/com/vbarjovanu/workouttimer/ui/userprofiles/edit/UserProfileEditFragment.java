@@ -22,15 +22,19 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
+import com.vbarjovanu.workouttimer.IMainActivityViewModel;
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
+import com.vbarjovanu.workouttimer.ui.userprofiles.images.IUserProfilesImagesService;
+import com.vbarjovanu.workouttimer.ui.userprofiles.images.UserProfilesImagesService;
 
 import java.io.File;
 import java.util.Objects;
 
 public class UserProfileEditFragment extends Fragment implements Observer<UserProfile>, View.OnClickListener {
     private IUserProfileEditViewModel userProfileEditViewModel;
+    private IMainActivityViewModel mainActivityViewModel;
     private EditText editTextDescription;
     private EditText editTextName;
     private ImageView imageView;
@@ -38,10 +42,25 @@ public class UserProfileEditFragment extends Fragment implements Observer<UserPr
     private Button buttonCancel;
     private Button buttonSave;
     private Bitmap newImageBitmap;
+    private IUserProfilesImagesService userProfilesImagesService;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Objects.requireNonNull(this.getActivity(), "Activity must be not null");
+
+        this.userProfilesImagesService = new UserProfilesImagesService(this.getContext());
+
+        View root = inflater.inflate(R.layout.fragment_userprofile_edit, container, false);
+        this.editTextName = root.findViewById(R.id.fragment_userprofile_edit_name);
+        this.editTextDescription = root.findViewById(R.id.fragment_userprofile_edit_description);
+        this.imageView = root.findViewById(R.id.fragment_userprofile_edit_image);
+        this.buttonSave = root.findViewById(R.id.fragment_userprofile_edit_save);
+        this.buttonCancel = root.findViewById(R.id.fragment_userprofile_edit_cancel);
+        this.imageView.setOnClickListener(this);
+        this.buttonSave.setOnClickListener(this);
+        this.buttonCancel.setOnClickListener(this);
+
+
         this.userProfileEditViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IUserProfileEditViewModel.class);
         this.userProfileEditViewModel.getUserProfile().observe(this, this);
         this.userProfileEditViewModel.getAction().observe(this, new Observer<UserProfileEditFragmentAction>() {
@@ -56,15 +75,14 @@ public class UserProfileEditFragment extends Fragment implements Observer<UserPr
                 }
             }
         });
-        View root = inflater.inflate(R.layout.fragment_userprofile_edit, container, false);
-        this.editTextName = root.findViewById(R.id.fragment_userprofile_edit_name);
-        this.editTextDescription = root.findViewById(R.id.fragment_userprofile_edit_description);
-        this.imageView = root.findViewById(R.id.fragment_userprofile_edit_image);
-        this.buttonSave = root.findViewById(R.id.fragment_userprofile_edit_save);
-        this.buttonCancel = root.findViewById(R.id.fragment_userprofile_edit_cancel);
-        this.imageView.setOnClickListener(this);
-        this.buttonSave.setOnClickListener(this);
-        this.buttonCancel.setOnClickListener(this);
+        this.mainActivityViewModel = ViewModelProviders.of(this.getActivity(), CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
+
+        return root;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
         if (this.getArguments() != null && this.getArguments().containsKey("userProfileId")) {
             String userProfileId = this.getArguments().getString("userProfileId");
             if (userProfileId != null) {
@@ -73,33 +91,22 @@ public class UserProfileEditFragment extends Fragment implements Observer<UserPr
                 this.userProfileEditViewModel.newUserProfile();
             }
         }
-        return root;
+        this.mainActivityViewModel.showNewEntityButton(false);
+        this.mainActivityViewModel.showSaveEntityButton(true);
     }
 
     @Override
     public void onChanged(UserProfile userProfile) {
         String name = "";
         String description = "";
-        Integer resourceId = R.drawable.userprofile;
 
         if (userProfile != null) {
             name = userProfile.getName();
             description = userProfile.getDescription();
-            if (userProfile.getImageFilePath() != null) {
-                File imgFile = new File(userProfile.getImageFilePath());
-                if (imgFile.exists()) {
-                    Bitmap imageBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    this.imageView.setImageBitmap(imageBitmap);
-                    resourceId = null;
-                }
-
-            }
         }
         this.editTextName.setText(name);
         this.editTextDescription.setText(description);
-        if (resourceId != null) {
-            this.imageView.setImageResource(resourceId);
-        }
+        this.imageView.setImageBitmap( this.userProfilesImagesService.getUserImage(userProfile));
     }
 
     @Override

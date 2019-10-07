@@ -14,28 +14,22 @@ import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfilesList;
 import com.vbarjovanu.workouttimer.ui.generic.recyclerview.ItemModel;
 import com.vbarjovanu.workouttimer.ui.generic.recyclerview.RecyclerViewAdapter;
+import com.vbarjovanu.workouttimer.ui.userprofiles.images.IUserProfilesImagesService;
 import com.vbarjovanu.workouttimer.ui.workouts.list.WorkoutsRecyclerViewItemAction;
 
 import java.io.File;
 
 public class UserProfilesRecyclerViewAdapter extends RecyclerViewAdapter<UserProfile, UserProfilesRecyclerViewItemAction> {
-    private final Bitmap defaultUserImage;
 
-    UserProfilesRecyclerViewAdapter(@NonNull UserProfilesList userProfilesList, Bitmap defaultUserImage) {
+    private final IUserProfilesImagesService userProfilesImagesService;
+    UserProfilesRecyclerViewAdapter(@NonNull UserProfilesList userProfilesList, IUserProfilesImagesService userProfilesImagesService) {
         super(userProfilesList, BR.item);
-        this.defaultUserImage = defaultUserImage;
+        this.userProfilesImagesService = userProfilesImagesService;
     }
 
     @Override
     protected ItemModel createItemModel(UserProfile model) {
-        Bitmap userImage = this.defaultUserImage;
-
-        if (model.getImageFilePath() != null) {
-            File imgFile = new File(model.getImageFilePath());
-            if (imgFile.exists()) {
-                userImage = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            }
-        }
+        Bitmap userImage = this.userProfilesImagesService.getUserImage(model);
 
         return new UserProfileItemModel(model.getId(), model.getName(), model.getDescription(), android.R.color.white, userImage);
     }

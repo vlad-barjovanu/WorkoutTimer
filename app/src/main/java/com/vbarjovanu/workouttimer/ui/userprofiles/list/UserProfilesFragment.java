@@ -24,6 +24,7 @@ import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfilesList
 import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
 import com.vbarjovanu.workouttimer.ui.generic.recyclerview.RecyclerViewItemActionData;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
+import com.vbarjovanu.workouttimer.ui.userprofiles.images.UserProfilesImagesService;
 
 import java.util.Objects;
 
@@ -109,10 +110,7 @@ public class UserProfilesFragment extends Fragment {
 
     private void onUserProfilesChanged(UserProfilesList userProfiles) {
         UserProfilesRecyclerViewAdapter userProfilesRecyclerViewAdapter;
-        Bitmap defaultUserImage;
-
-        defaultUserImage = BitmapFactory.decodeResource(getResources(), R.drawable.userprofile);
-        userProfilesRecyclerViewAdapter = new UserProfilesRecyclerViewAdapter(userProfiles, defaultUserImage);
+        userProfilesRecyclerViewAdapter = new UserProfilesRecyclerViewAdapter(userProfiles, new UserProfilesImagesService(this.getContext()));
         userProfilesRecyclerViewAdapter.getItemAction().observe(this, new Observer<RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction>>() {
             @Override
             public void onChanged(RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction> itemActionData) {

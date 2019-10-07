@@ -99,7 +99,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:contentDescription="@string/work_duration"
-                    android:src="@drawable/work" />
+                    android:src="@drawable/work_24" />
 
                 <EditText
                     android:id="@+id/fragment_workout_edit_work_duration"
@@ -166,7 +166,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:contentDescription="@string/cycles_count"
-                    android:src="@drawable/cycles" />
+                    android:src="@drawable/cycles_24" />
 
                 <EditText
                     android:id="@+id/fragment_workout_edit_cycles_count"

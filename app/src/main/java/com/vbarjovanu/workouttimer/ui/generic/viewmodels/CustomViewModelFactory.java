@@ -21,6 +21,8 @@ import com.vbarjovanu.workouttimer.ui.colors.IColorsPickerViewModel;
 import com.vbarjovanu.workouttimer.ui.home.HomeViewModel;
 import com.vbarjovanu.workouttimer.ui.home.IHomeViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.edit.IUserProfileEditViewModel;
+import com.vbarjovanu.workouttimer.ui.userprofiles.images.IUserProfilesImagesService;
+import com.vbarjovanu.workouttimer.ui.userprofiles.images.UserProfilesImagesService;
 import com.vbarjovanu.workouttimer.ui.userprofiles.list.IUserProfilesViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.edit.UserProfileEditViewModel;
 import com.vbarjovanu.workouttimer.ui.userprofiles.list.UserProfilesViewModel;
@@ -55,6 +57,10 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
         return UserProfilesFactory.getUserProfilesService(this.fileRepositorySettings);
     }
 
+    private IUserProfilesImagesService getUserProfilesImagesService() {
+        return new UserProfilesImagesService(this.application.getApplicationContext());
+    }
+
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
@@ -85,7 +91,7 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
         }
         if (modelClass.isAssignableFrom(IHomeViewModel.class)) {
             //noinspection unchecked
-            return (T) new HomeViewModel(this.application, this.getApplicationSession(), this.getWorkoutsService(), this.getUserProfilesService());
+            return (T) new HomeViewModel(this.application, this.getApplicationSession(), this.getWorkoutsService(), this.getUserProfilesService(), this.getUserProfilesImagesService());
         }
         try {
             return modelClass.newInstance();

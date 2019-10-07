@@ -23,6 +23,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ImageView
+            android:id="@+id/fragment_home_imageview_userimage"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="20dp"
+            android:contentDescription="@string/userprofileimage"
+            android:scaleType="fitCenter"
+            app:imageBitmap="@{homeModel.userImage}"
+            app:layout_constraintDimensionRatio="H, 1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_default="percent"
+            app:layout_constraintHeight_percent="0.4"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintWidth_percent="0.4" />
+
         <TextView
             android:id="@+id/fragment_home_textview_welcome"
             android:layout_width="match_parent"
@@ -30,54 +47,36 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:onClick="@{(v)->clickListners.onWelcomeTextClick(v)}"
+            android:text="@{homeModel.welcomeText}"
             android:textAlignment="center"
             android:textSize="20sp"
-            android:text="@{homeModel.welcomeText}"
-            android:onClick="@{(v)->clickListners.onWelcomeTextClick(v)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_home_imageview_userimage" />
 
-        <LinearLayout
-            android:id="@+id/fragment_home_linearlayout_workouts"
+        <TextView
+            android:id="@+id/fragment_home_textview_workouts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/fragment_home_textview_welcome">
+            android:layout_gravity="center_vertical"
+            android:layout_margin="20dp"
+            android:drawableStart="@drawable/work_black_48"
+            android:onClick="@{(v)->clickListners.onWorkoutsClick(v)}"
+            android:text="@{homeModel.workoutsCountText}"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/fragment_home_textview_welcome" />
 
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/work"
-                android:contentDescription="@string/workout" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:textSize="20sp"
-                android:text="@{homeModel.workoutsCountText}"
-                android:onClick="@{(v)->clickListners.onWorkoutsClick(v)}" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/fragment_home_linearlayout_sequences"
+        <TextView
+            android:id="@+id/fragment_home_textview_sequences"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/fragment_home_linearlayout_workouts">
-
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/cycles"
-                android:contentDescription="@string/sequences" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:textSize="20sp"
-                android:text="@{homeModel.sequencesCountText}"
-                android:onClick="@{(v)->clickListners.onSequencesClick(v)}" />
-        </LinearLayout>
+            android:layout_gravity="center_vertical"
+            android:layout_margin="20dp"
+            android:drawableStart="@drawable/cycles_black_48"
+            android:onClick="@{(v)->clickListners.onSequencesClick(v)}"
+            android:text="@{homeModel.sequencesCountText}"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/fragment_home_textview_workouts" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
