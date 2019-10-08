@@ -86,6 +86,17 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         this.countDownLatch = countDownLatch;
     }
 
+    @Override
+    public void deleteUserImage() {
+        UserProfileModel userProfileModel;
+        userProfileModel = this.userProfileModel.getValue();
+        if (userProfileModel != null) {
+            userProfileModel.getUserProfile().setImageFilePath(null);
+            userProfileModel.setUserImage(this.userProfilesImagesService.getUserImage(userProfileModel.getUserProfile()));
+            this.userProfileModel.setValue(userProfileModel);
+        }
+    }
+
     private void decreaseCountDownLatch() {
         if (this.countDownLatch != null) {
             this.countDownLatch.countDown();

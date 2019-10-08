@@ -50,4 +50,9 @@ public abstract class IUserProfileEditViewModel extends ViewModel implements ISy
      * @return the action
      */
     abstract SingleLiveEvent<UserProfileEditFragmentAction> getAction();
+
+    /**
+     * Removes the recorded user image and the default one will be restored
+     */
+    public abstract void deleteUserImage();
 }

@@ -53,6 +53,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="10pt"
+            android:background="@drawable/border_shape"
             android:contentDescription="@string/userprofileimage"
             android:onClick="@{(v)->clickListners.onUserImageClick(v)}"
             android:scaleType="fitCenter"
@@ -65,5 +66,16 @@
             app:layout_constraintTop_toBottomOf="@id/fragment_userprofile_edit_description"
             app:layout_constraintWidth_default="percent"
             app:layout_constraintWidth_percent="0.4" />
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:contentDescription="@string/delete"
+            android:onClick="@{(v)->clickListners.onDeleteUserImageClick(v)}"
+            android:scaleType="fitCenter"
+            android:src="@drawable/delete_red_24"
+            app:layout_constraintStart_toEndOf="@id/fragment_userprofile_edit_image"
+            app:layout_constraintTop_toTopOf="@id/fragment_userprofile_edit_image" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

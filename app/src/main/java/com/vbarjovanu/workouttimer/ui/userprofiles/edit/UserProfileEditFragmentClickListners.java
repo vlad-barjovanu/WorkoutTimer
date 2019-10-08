@@ -4,4 +4,5 @@ import android.view.View;
 
 public interface UserProfileEditFragmentClickListners {
     void onUserImageClick(View view);
+    void onDeleteUserImageClick(View view);
 }

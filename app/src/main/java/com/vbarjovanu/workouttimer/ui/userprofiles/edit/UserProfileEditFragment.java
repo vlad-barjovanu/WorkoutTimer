@@ -34,7 +34,7 @@ import com.vbarjovanu.workouttimer.ui.userprofiles.images.UserProfilesImagesServ
 
 import java.util.Objects;
 
-public class UserProfileEditFragment extends Fragment implements UserProfileEditFragmentClickListners {
+public class UserProfileEditFragment extends Fragment {
     private FragmentUserprofileEditBinding binding;
     private IUserProfileEditViewModel userProfileEditViewModel;
     private IMainActivityViewModel mainActivityViewModel;
@@ -46,7 +46,7 @@ public class UserProfileEditFragment extends Fragment implements UserProfileEdit
 
         View root = inflater.inflate(R.layout.fragment_userprofile_edit, container, false);
         this.binding = FragmentUserprofileEditBinding.bind(root);
-        this.binding.setClickListners(this);
+        this.setBindingClickListeners();
         this.userProfileEditViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IUserProfileEditViewModel.class);
         this.userProfileEditViewModel.getUserProfileModel().observe(this, new Observer<UserProfileModel>() {
             @Override
@@ -82,11 +82,24 @@ public class UserProfileEditFragment extends Fragment implements UserProfileEdit
         return root;
     }
 
+    private void setBindingClickListeners(){
+        this.binding.setClickListners(new UserProfileEditFragmentClickListners() {
+            @Override
+            public void onUserImageClick(View view) {
+                UserProfileEditFragment.this.onUserImageClick(view);
+            }
+
+            @Override
+            public void onDeleteUserImageClick(View view) {
+                UserProfileEditFragment.this.onDeleteUserImageClick(view);
+            }
+        });
+
+    }
 
     private void onUserProfileModelChanged(UserProfileModel userProfileModel) {
         this.binding.setUserProfileModel(userProfileModel);
     }
-
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -145,8 +158,11 @@ public class UserProfileEditFragment extends Fragment implements UserProfileEdit
         }
     }
 
-    @Override
-    public void onUserImageClick(View view) {
+    private void onUserImageClick(View view) {
             this.dispatchTakePictureIntent();
+    }
+
+    private void onDeleteUserImageClick(View view) {
+        this.userProfileEditViewModel.deleteUserImage();
     }
 }
