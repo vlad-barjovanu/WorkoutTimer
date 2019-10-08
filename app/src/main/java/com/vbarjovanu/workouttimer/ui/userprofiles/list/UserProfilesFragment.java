@@ -110,14 +110,16 @@ public class UserProfilesFragment extends Fragment {
 
     private void onUserProfilesChanged(UserProfilesList userProfiles) {
         UserProfilesRecyclerViewAdapter userProfilesRecyclerViewAdapter;
-        userProfilesRecyclerViewAdapter = new UserProfilesRecyclerViewAdapter(userProfiles, new UserProfilesImagesService(this.getContext()));
-        userProfilesRecyclerViewAdapter.getItemAction().observe(this, new Observer<RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction>>() {
-            @Override
-            public void onChanged(RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction> itemActionData) {
-                onUserProfilesRecyclerViewAdapterItemAction(itemActionData);
-            }
-        });
-        this.recyclerView.setAdapter(userProfilesRecyclerViewAdapter);
+        if(this.getActivity()!=null) {
+            userProfilesRecyclerViewAdapter = new UserProfilesRecyclerViewAdapter(userProfiles, CustomViewModelFactory.getInstance(this.getActivity().getApplication()).getUserProfilesImagesService());
+            userProfilesRecyclerViewAdapter.getItemAction().observe(this, new Observer<RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction>>() {
+                @Override
+                public void onChanged(RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction> itemActionData) {
+                    onUserProfilesRecyclerViewAdapterItemAction(itemActionData);
+                }
+            });
+            this.recyclerView.setAdapter(userProfilesRecyclerViewAdapter);
+        }
     }
 
     private void onMainActivityAction(EventContent<MainActivityActionData> eventContent) {

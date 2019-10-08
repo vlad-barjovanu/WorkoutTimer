@@ -57,8 +57,8 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
         return UserProfilesFactory.getUserProfilesService(this.fileRepositorySettings);
     }
 
-    private IUserProfilesImagesService getUserProfilesImagesService() {
-        return new UserProfilesImagesService(this.application.getApplicationContext());
+    public IUserProfilesImagesService getUserProfilesImagesService() {
+        return new UserProfilesImagesService(this.application.getApplicationContext(), this.fileRepositorySettings);
     }
 
     @NonNull
@@ -83,7 +83,7 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
         }
         if (modelClass.isAssignableFrom(IUserProfileEditViewModel.class)) {
             //noinspection unchecked
-            return (T) new UserProfileEditViewModel(this.getApplicationSession(), this.getUserProfilesService());
+            return (T) new UserProfileEditViewModel(this.getUserProfilesService(), this.getUserProfilesImagesService());
         }
         if (modelClass.isAssignableFrom(IColorsPickerViewModel.class)) {
             //noinspection unchecked

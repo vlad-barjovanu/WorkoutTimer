@@ -4,34 +4,31 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
 import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesService;
-import com.vbarjovanu.workouttimer.business.services.userprofiles.UserProfilesFactory;
 import com.vbarjovanu.workouttimer.helpers.files.BitmapFileWriter;
-import com.vbarjovanu.workouttimer.session.IApplicationSession;
 import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
+import com.vbarjovanu.workouttimer.ui.userprofiles.images.IUserProfilesImagesService;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CountDownLatch;
 
 public class UserProfileEditViewModel extends IUserProfileEditViewModel {
-    private MutableLiveData<UserProfile> userProfileEditLiveData;
+    private MutableLiveData<UserProfileModel> userProfileModel;
     private final IUserProfilesService userProfilesService;
-    private final IApplicationSession applicationSession;
+    private final IUserProfilesImagesService userProfilesImagesService;
     private SingleLiveEvent<UserProfileEditFragmentAction> action;
     private CountDownLatch countDownLatch;
 
-    public UserProfileEditViewModel(@NonNull IApplicationSession applicationSession, IUserProfilesService userProfilesService) {
+    public UserProfileEditViewModel(IUserProfilesService userProfilesService, IUserProfilesImagesService userProfilesImagesService) {
         super();
-        this.applicationSession = applicationSession;
         this.userProfilesService = userProfilesService;
-        this.userProfileEditLiveData = new MutableLiveData<>();
+        this.userProfileModel = new MutableLiveData<>();
         this.action = new SingleLiveEvent<>();
+        this.userProfilesImagesService = userProfilesImagesService;
     }
 
     @Override
@@ -47,15 +44,16 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         UserProfile userProfile;
         try {
             userProfile = this.userProfilesService.createModel();
-            this.userProfileEditLiveData.setValue(userProfile);
+            this.decreaseCountDownLatch();
+            this.userProfileModel.setValue(new UserProfileModel(userProfile, this.userProfilesImagesService.getUserImage(userProfile)));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    LiveData<UserProfile> getUserProfile() {
-        return this.userProfileEditLiveData;
+    LiveData<UserProfileModel> getUserProfileModel() {
+        return this.userProfileModel;
     }
 
     @Override
@@ -64,31 +62,22 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
     }
 
     @Override
-    void saveUserProfile(String name, String description, Bitmap newImageBitmap) {
-        String filePath;
-        UserProfile userProfile = this.userProfileEditLiveData.getValue();
-        if (userProfile != null) {
-            userProfile.setName(name);
-            userProfile.setDescription(description);
-            if (newImageBitmap != null) {
-                BitmapFileWriter bitmapFileWriter = new BitmapFileWriter();
-                filePath = this.userProfilesService.getImagesFolderPath() + userProfile.getId() + ".png";
-                try {
-                    bitmapFileWriter.writeFile(filePath, newImageBitmap, Bitmap.CompressFormat.PNG, 100);
-                } catch (IOException e) {
-                    filePath = null;
-                }
-                userProfile.setImageFilePath(filePath);
-            }
-            SaveAsyncTask asyncTask;
+    void saveUserProfile(UserProfileModel userProfileModelToSave) {
+        UserProfileModel userProfileModel;
+        SaveAsyncTask asyncTask;
+
+        userProfileModel = this.userProfileModel.getValue();
+        if (userProfileModel != null) {
+            this.userProfilesImagesService.setUserImage(userProfileModel.getUserProfile(), userProfileModel.getUserImage());
+            userProfileModel.getUserProfile().update(userProfileModelToSave.getUserProfile());
             asyncTask = new SaveAsyncTask(this);
-            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, userProfile);
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, userProfileModel.getUserProfile());
         }
     }
 
     @Override
     void cancelUserProfileEdit() {
-        this.userProfileEditLiveData.setValue(null);
+        this.userProfileModel.setValue(null);
         this.action.setValue(UserProfileEditFragmentAction.GOTO_USERPROFILES);
     }
 
@@ -123,7 +112,7 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         @Override
         protected void onPostExecute(UserProfile data) {
             Log.v("loaddata", "onPostExecute");
-            this.userProfileEditViewModel.userProfileEditLiveData.setValue(data);
+            this.userProfileEditViewModel.userProfileModel.setValue(new UserProfileModel(data, this.userProfileEditViewModel.userProfilesImagesService.getUserImage(data)));
             this.userProfileEditViewModel.decreaseCountDownLatch();
         }
     }
@@ -149,7 +138,7 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         protected void onPostExecute(UserProfile data) {
             Log.v("savedata", "onPostExecute");
             this.userProfileEditViewModel.decreaseCountDownLatch();
-            this.userProfileEditViewModel.userProfileEditLiveData.setValue(data);
+            this.userProfileEditViewModel.userProfileModel.setValue(new UserProfileModel(data, this.userProfileEditViewModel.userProfilesImagesService.getUserImage(data)));
             this.userProfileEditViewModel.action.setValue(UserProfileEditFragmentAction.GOTO_USERPROFILES);
         }
     }

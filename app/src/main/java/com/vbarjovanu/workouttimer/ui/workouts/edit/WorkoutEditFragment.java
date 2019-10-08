@@ -51,16 +51,21 @@ public class WorkoutEditFragment extends Fragment implements WorkoutEditFragment
             root = inflater.inflate(R.layout.fragment_workout_edit, container, false);
             this.binding = FragmentWorkoutEditBinding.bind(root);
             this.binding.setClickListners(this);
-            if (this.getArguments() != null && this.getArguments().containsKey("workoutId")) {
-                String workoutId = this.getArguments().getString("workoutId");
-                if (workoutId == null) {
-                    this.workoutEditViewModel.newWorkout();
-                } else {
-                    this.workoutEditViewModel.loadWorkout(workoutId);
-                }
-            }
         }
         return root;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (this.getArguments() != null && this.getArguments().containsKey("workoutId")) {
+            String workoutId = this.getArguments().getString("workoutId");
+            if (workoutId == null) {
+                this.workoutEditViewModel.newWorkout();
+            } else {
+                this.workoutEditViewModel.loadWorkout(workoutId);
+            }
+        }
     }
 
     @Override

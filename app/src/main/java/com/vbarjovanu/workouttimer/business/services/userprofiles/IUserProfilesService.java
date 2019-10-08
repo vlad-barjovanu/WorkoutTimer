@@ -47,10 +47,4 @@ public interface IUserProfilesService extends IModelsService<UserProfile, UserPr
      * @throws InstantiationException constructor call for new model fails
      */
     UserProfile createDefaultModel() throws IllegalAccessException, InvocationTargetException, InstantiationException;
-
-    /**
-     * Returns the folder path where user profile images are stored
-     * @return folder path
-     */
-    String getImagesFolderPath();
 }

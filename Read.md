@@ -1,3 +1,6 @@
+Layouts
+    https://developer.android.com/reference/android/support/constraint/ConstraintLayout
+
 Recylcerview 
     https://www.sitepoint.com/mastering-complex-lists-with-the-android-recyclerview/
     https://developer.android.com/guide/topics/ui/layout/recyclerview

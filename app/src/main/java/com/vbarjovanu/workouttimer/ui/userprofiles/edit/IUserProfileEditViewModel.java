@@ -32,15 +32,13 @@ public abstract class IUserProfileEditViewModel extends ViewModel implements ISy
      * Returns the user profile to edit
      * @return user profile live data
      */
-    abstract LiveData<UserProfile> getUserProfile();
+    abstract LiveData<UserProfileModel> getUserProfileModel();
 
     /**
      * Saves the user profile changes
-     * @param name name of the user profile
-     * @param description description of the user profile
-     * @param newImageBitmap new image bitmap
+     * @param userProfileModelToSave user profile to be saved
      */
-    abstract void saveUserProfile(String name, String description, Bitmap newImageBitmap);
+    abstract void saveUserProfile(UserProfileModel userProfileModelToSave);
 
     /**
      * Cancels the edit of the user profile

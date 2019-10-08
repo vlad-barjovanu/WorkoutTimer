@@ -51,9 +51,4 @@ public class UserProfilesService extends ModelsService<UserProfile, UserProfiles
         userProfile.setImageFilePath(null);
         return userProfile;
     }
-
-    @Override
-    public String getImagesFolderPath() {
-        return this.modelsFileRepositorySettings.getFolderPath() + "/images/";
-    }
 }

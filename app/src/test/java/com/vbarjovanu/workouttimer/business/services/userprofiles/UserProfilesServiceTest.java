@@ -135,14 +135,4 @@ public class UserProfilesServiceTest {
         Assert.assertNotNull(userProfile);
         Assert.assertNotNull(userProfile.getId());
     }
-
-    @Test
-    public void getImage() {
-        String imageFolderPath;
-        String folderPath;
-        folderPath = folder.getRoot().getPath();
-        imageFolderPath = this.userProfilesService.getImagesFolderPath();
-        Assert.assertNotNull(imageFolderPath);
-        Assert.assertEquals(folderPath + "/images/", imageFolderPath);
-    }
 }
