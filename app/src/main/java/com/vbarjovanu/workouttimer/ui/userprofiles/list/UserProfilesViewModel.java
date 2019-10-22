@@ -56,7 +56,7 @@ public class UserProfilesViewModel extends IUserProfilesViewModel {
         if (userProfile != null) {
             this.selectedUserProfileId = id;
             this.applicationSession.setUserProfileId(this.selectedUserProfileId);
-            this.actionData.setValue(new UserProfilesFragmentActionData(UserProfilesFragmentAction.GOTO_HOME));
+            this.actionData.setValue(new UserProfilesFragmentActionData(UserProfilesFragmentAction.GOTO_HOME, this.selectedUserProfileId));
             return true;
         }
         return false;

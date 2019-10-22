@@ -23,7 +23,7 @@ public class UserProfileModel extends BaseObservable {
 
     @Bindable
     public Bitmap getUserImage() {
-        return userImage;
+        return this.userImage;
     }
 
     public UserProfileModel setUserImage(Bitmap userImage) {

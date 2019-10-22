@@ -66,18 +66,17 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         UserProfileModel userProfileModel;
         SaveAsyncTask asyncTask;
 
-        userProfileModel = this.userProfileModel.getValue();
-        if (userProfileModel != null) {
-            this.userProfilesImagesService.setUserImage(userProfileModel.getUserProfile(), userProfileModel.getUserImage());
-            userProfileModel.getUserProfile().update(userProfileModelToSave.getUserProfile());
-            asyncTask = new SaveAsyncTask(this);
-            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, userProfileModel.getUserProfile());
-        }
+        asyncTask = new SaveAsyncTask(this);
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, userProfileModelToSave);
     }
 
     @Override
     void cancelUserProfileEdit() {
-        this.userProfileModel.setValue(null);
+        UserProfileModel userProfileModel;
+        userProfileModel = this.userProfileModel.getValue();
+        if (userProfileModel != null) {
+            this.userProfileModel.setValue(null);
+        }
         this.action.setValue(UserProfileEditFragmentAction.GOTO_USERPROFILES);
     }
 
@@ -123,12 +122,14 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         @Override
         protected void onPostExecute(UserProfile data) {
             Log.v("loaddata", "onPostExecute");
-            this.userProfileEditViewModel.userProfileModel.setValue(new UserProfileModel(data, this.userProfileEditViewModel.userProfilesImagesService.getUserImage(data)));
+            if (data != null || this.userProfileEditViewModel.userProfileModel.getValue() != null) {
+                this.userProfileEditViewModel.userProfileModel.setValue(new UserProfileModel(data, this.userProfileEditViewModel.userProfilesImagesService.getUserImage(data)));
+            }
             this.userProfileEditViewModel.decreaseCountDownLatch();
         }
     }
 
-    static class SaveAsyncTask extends AsyncTask<UserProfile, Void, UserProfile> {
+    static class SaveAsyncTask extends AsyncTask<UserProfileModel, Void, UserProfileModel> {
         private final UserProfileEditViewModel userProfileEditViewModel;
 
         SaveAsyncTask(UserProfileEditViewModel userProfileEditViewModel) {
@@ -136,20 +137,28 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         }
 
         @Override
-        protected UserProfile doInBackground(UserProfile... data) {
-            UserProfile userProfile;
+        protected UserProfileModel doInBackground(UserProfileModel... data) {
+            UserProfileModel userProfileModelToSave;
+            UserProfileModel userProfileModel;
 
             Log.v("savedata", "doInBackground");
-            userProfile = data[0];
-            this.userProfileEditViewModel.userProfilesService.saveModel(userProfile);
-            return userProfile;
+            userProfileModelToSave = data[0];
+            userProfileModel = this.userProfileEditViewModel.userProfileModel.getValue();
+            if (userProfileModel != null) {
+                this.userProfileEditViewModel.userProfilesImagesService.setUserImage(userProfileModel.getUserProfile(), userProfileModel.getUserImage());
+                userProfileModel.getUserProfile().update(userProfileModelToSave.getUserProfile());
+                this.userProfileEditViewModel.userProfilesService.saveModel(userProfileModel.getUserProfile());
+            }
+            return userProfileModel;
         }
 
         @Override
-        protected void onPostExecute(UserProfile data) {
+        protected void onPostExecute(UserProfileModel data) {
             Log.v("savedata", "onPostExecute");
             this.userProfileEditViewModel.decreaseCountDownLatch();
-            this.userProfileEditViewModel.userProfileModel.setValue(new UserProfileModel(data, this.userProfileEditViewModel.userProfilesImagesService.getUserImage(data)));
+            if (data != null || data != this.userProfileEditViewModel.userProfileModel.getValue()) {
+                this.userProfileEditViewModel.userProfileModel.setValue(data);
+            }
             this.userProfileEditViewModel.action.setValue(UserProfileEditFragmentAction.GOTO_USERPROFILES);
         }
     }
