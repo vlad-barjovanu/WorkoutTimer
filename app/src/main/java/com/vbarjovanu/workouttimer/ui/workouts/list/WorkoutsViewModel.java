@@ -21,8 +21,6 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
 
     private SingleLiveEvent<WorkoutsFragmentActionData> actionData;
 
-    private String selectedWorkoutId;
-
     private CountDownLatch countDownLatch;
 
     public WorkoutsViewModel(IWorkoutsService workoutsService) {
@@ -47,38 +45,29 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
     }
 
     @Override
-    public boolean setSelectedWorkoutId(String id) {
-        Workout workout = null;
-        if (this.workoutsLiveData.getValue() != null) {
-            workout = this.workoutsLiveData.getValue().find(id);
-        }
-        if (workout != null) {
-            this.selectedWorkoutId = id;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public String getSelectedWorkoutId() {
-        return this.selectedWorkoutId;
-    }
-
-    @Override
     public void newWorkout(String profileId) {
         this.actionData.setValue(new WorkoutsFragmentActionData(WorkoutsFragmentAction.GOTO_WORKOUT_NEW, profileId, null));
     }
 
     @Override
     public void editWorkout(String profileId, String workoutId) {
-        this.actionData.setValue(new WorkoutsFragmentActionData(WorkoutsFragmentAction.GOTO_WORKOUT_EDIT, profileId, workoutId));
+        Workout workout = null;
+        WorkoutsList workoutsList = this.getWorkouts().getValue();
+        if (workoutsList != null) {
+            workout = workoutsList.find(workoutId);
+        }
+        if (workout != null) {
+            this.actionData.setValue(new WorkoutsFragmentActionData(WorkoutsFragmentAction.GOTO_WORKOUT_EDIT, profileId, workoutId));
+        }
     }
 
     @Override
     public void deleteWorkout(String profileId, String workoutId) {
-        if (this.workoutsService.deleteModel(profileId, workoutId)) {
-            this.loadWorkouts(profileId);
-        }
+        new DeleteAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, profileId, workoutId);
+//
+//        if (this.workoutsService.deleteModel(profileId, workoutId)) {
+//            this.loadWorkouts(profileId);
+//        }
     }
 
     @Override
@@ -113,12 +102,14 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
         @Override
         protected void onPostExecute(WorkoutsList data) {
             Log.v("loaddata", "onPostExecute");
-            this.workoutsViewModel.workoutsLiveData.setValue(data);
+            if (data != null || this.workoutsViewModel.workoutsLiveData.getValue() != null) {
+                this.workoutsViewModel.workoutsLiveData.setValue(data);
+            }
             this.workoutsViewModel.decreaseCountDownLatch();
         }
     }
 
-    static class DeleteAsyncTask extends AsyncTask<String, Void, Boolean> {
+    static class DeleteAsyncTask extends AsyncTask<String, Void, Object[]> {
         WorkoutsViewModel workoutsViewModel;
         private String profileId;
         private String workoutId;
@@ -128,24 +119,41 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
         }
 
         @Override
-        protected Boolean doInBackground(String... strings) {
-            Boolean data;
+        protected Object[] doInBackground(String... strings) {
+            boolean success;
+            WorkoutsList workoutsList;
+            Workout workout = null;
 
             Log.v("deletedata", "doInBackground");
             this.profileId = strings[0];
             this.workoutId = strings[1];
-            data = this.workoutsViewModel.workoutsService.deleteModel(this.profileId, this.workoutId);
-            return data;
+            workoutsList = this.workoutsViewModel.getWorkouts().getValue();
+            if (workoutsList != null) {
+                workout = workoutsList.find(workoutId);
+            }
+            workoutsList = null;
+            success = this.workoutsViewModel.workoutsService.deleteModel(this.profileId, workout);
+            if (success) {
+                workoutsList = this.workoutsViewModel.workoutsService.loadModels(profileId);
+            }
+            return new Object[]{success, workoutsList};
         }
 
         @Override
-        protected void onPostExecute(Boolean data) {
+        protected void onPostExecute(Object[] data) {
+            Boolean success;
+            WorkoutsList workoutsList;
             Log.v("deletedata", "onPostExecute");
-            if (data) {
-                this.workoutsViewModel.loadWorkouts(this.profileId);
+            success = (Boolean)data[0];
+            workoutsList = (WorkoutsList) data[1];
+            if (success) {
+                if (workoutsList != null || this.workoutsViewModel.workoutsLiveData.getValue() != null) {
+                    this.workoutsViewModel.workoutsLiveData.setValue(workoutsList);
+                }
             } else {
                 this.workoutsViewModel.actionData.setValue(new WorkoutsFragmentActionData(WorkoutsFragmentAction.DISPLAY_WORKOUT_DELETE_FAILED, this.profileId, this.workoutId));
             }
+            this.workoutsViewModel.decreaseCountDownLatch();
         }
     }
 }

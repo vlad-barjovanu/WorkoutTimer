@@ -62,21 +62,18 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
         SaveAsyncTask asyncTask;
 
         //TODO add validation
-//        workoutToSave.validate();
-
-        Workout workout = this.workoutLiveData.getValue();
-        if (workout != null) {
-            workout.update(workoutToSave);
-            userProfileId = this.applicationSession.getUserProfileId();
-            asyncTask = new SaveAsyncTask(this, userProfileId);
-            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, workout);
-        }
+        userProfileId = this.applicationSession.getUserProfileId();
+        asyncTask = new SaveAsyncTask(this, userProfileId);
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, workoutToSave);
     }
 
     @Override
     void cancelWorkoutEdit() {
-        this.workoutLiveData.setValue(null);
+        if (this.workoutLiveData.getValue() != null) {
+            this.workoutLiveData.setValue(null);
+        }
         this.action.setValue(WorkoutEditFragmentAction.GOTO_WORKOUTS);
+        this.decreaseCountDownLatch();
     }
 
     @Override
@@ -139,12 +136,17 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
 
         @Override
         protected Workout doInBackground(Workout... data) {
-            Workout workout;
+            Workout workoutToSave;
 
             Log.v("savedata", "doInBackground");
-            IWorkoutsService workoutsService = this.workoutEditViewModel.workoutsService;
-            workout = data[0];
-            workoutsService.saveModel(this.userProfileId, workout);
+            workoutToSave = data[0];
+
+            Workout workout = this.workoutEditViewModel.getWorkout().getValue();
+            if (workout != null) {
+                workout.update(workoutToSave);
+                this.workoutEditViewModel.workoutsService.saveModel(this.userProfileId, workout);
+            }
+
             return workout;
         }
 
@@ -152,7 +154,9 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
         protected void onPostExecute(Workout data) {
             Log.v("savedata", "onPostExecute");
             this.workoutEditViewModel.decreaseCountDownLatch();
-            this.workoutEditViewModel.workoutLiveData.setValue(data);
+            if (data != null || this.workoutEditViewModel.workoutLiveData.getValue() != null) {
+                this.workoutEditViewModel.workoutLiveData.setValue(data);
+            }
             this.workoutEditViewModel.action.setValue(WorkoutEditFragmentAction.GOTO_WORKOUTS);
         }
     }

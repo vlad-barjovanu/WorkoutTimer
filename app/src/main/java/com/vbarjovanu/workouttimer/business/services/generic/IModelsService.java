@@ -8,14 +8,14 @@ import java.lang.reflect.InvocationTargetException;
 public interface IModelsService<T extends IModel<T>, Z extends ModelsList<T>> {
     /**
      * @param profileId user's profile ID for which to load the models from repository
-     * @return a list of models stored for the identified profile
+     * @return a list of models stored for the identified profile; if profile is unknown, returns an empty list
      */
     Z loadModels(String profileId);
 
     /**
      * @param profileId user's profile ID
      * @param primaryKey models's ID
-     * @return the model identified by the ID
+     * @return the model identified by the ID; if no model is found it returns null
      */
     T loadModel(String profileId, String primaryKey);
 

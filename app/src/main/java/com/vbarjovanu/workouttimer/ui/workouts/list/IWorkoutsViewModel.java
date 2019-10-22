@@ -27,19 +27,6 @@ public abstract class IWorkoutsViewModel extends ViewModel implements ISynchroni
     abstract SingleLiveEvent<WorkoutsFragmentActionData> getActionData();
 
     /**
-     * Selects a specific workout by ID
-     * @param id workout's ID that was selected by user
-     * @return true if selection is successful
-     */
-    public abstract boolean setSelectedWorkoutId(String id);
-
-    /**
-     * Returns the selected workout ID
-     * @return selected workout's ID
-     */
-    public abstract String getSelectedWorkoutId();
-
-    /**
      * Starts the workflow of creating a new workout
      * @param profileId ID of the user profile
      */
