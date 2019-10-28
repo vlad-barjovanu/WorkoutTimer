@@ -27,15 +27,21 @@
     <string name="start_workout">Start workout</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="prepare">Prepare</string>
     <string name="prepare_duration">Prepare duration</string>
     <string name="work_duration">Work duration</string>
+    <string name="hint_total_remaining_duration">01:35</string>
+    <string name="work">Work</string>
     <string name="work_description">Work description</string>
     <string name="workout_description">Workout description</string>
+    <string name="rest">Rest</string>
     <string name="rest_description">Rest description</string>
     <string name="rest_duration">Rest duration</string>
     <string name="cycles_count">Cycles count</string>
     <string name="sets_count">Sets count</string>
+    <string name="rest_between_sets">Rest between sets</string>
     <string name="rest_between_sets_duration">Rest between sets duration</string>
+    <string name="cool_down">Cool down</string>
     <string name="cool_down_duration">Cool down duration</string>
     <string name="edit_workout">Edit workout</string>
     <string name="message_no_workouts_are_defined">No workouts are defined yet. Add one to begin with!</string>
@@ -47,4 +53,15 @@
     <string name="message_home_fragment_no_workouts">You have no workouts yet. Add a new workout</string>
     <string name="message_home_fragment_no_sequences">You have no sequences yet. Add a new sequence</string>
     <string name="message_home_fragment_welcome">Welcome %s</string>
+    <string name="message_workout_training_fragment_cycle_index">%1$d / %2$d</string>
+    <string name="hint_workout_training_fragment_cycle_index">1 / 5</string>
+    <string name="message_workout_training_fragment_set_index">%1$d / %2$d</string>
+    <string name="hint_workout_training_fragment_set_index">1 / 2</string>
+    <string name="hint_duration">90</string>
+    <string name="hint_item_type">Work</string>
+    <string name="lock">Lock</string>
+    <string name="pause_workout">Pause workout</string>
+    <string name="previous_workout_item">Previous workout item</string>
+    <string name="next_workout_item">Next workout item</string>
+
 </resources>

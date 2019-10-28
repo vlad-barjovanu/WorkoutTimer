@@ -8,6 +8,8 @@ import androidx.lifecycle.Observer;
 
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
 import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesService;
+import com.vbarjovanu.workouttimer.preferences.IFileRepositoryPreferences;
+import com.vbarjovanu.workouttimer.preferences.IWorkoutTimerPreferences;
 import com.vbarjovanu.workouttimer.session.IApplicationSession;
 import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 import com.vbarjovanu.workouttimer.ui.userprofiles.images.IUserProfilesImagesService;
@@ -79,7 +81,11 @@ public class UserProfileEditViewModelTest {
     }
 
     private void setupMockedAppSession() {
-        Mockito.when(this.applicationSession.getFileRepositoriesFolderPath()).thenReturn(folder.getRoot().getAbsolutePath());
+        IWorkoutTimerPreferences workoutTimerPreferences = mock(IWorkoutTimerPreferences.class);
+        IFileRepositoryPreferences fileRepositoryPreferences= mock(IFileRepositoryPreferences.class);
+        Mockito.when(this.applicationSession.getWorkoutTimerPreferences()).thenReturn(workoutTimerPreferences);
+        Mockito.when(workoutTimerPreferences.getFileRepositoryPreferences()).thenReturn(fileRepositoryPreferences);
+        Mockito.when(fileRepositoryPreferences.getFolderPath()).thenReturn(folder.getRoot().getAbsolutePath());
         Mockito.when(this.applicationSession.getUserProfileId()).thenReturn("123");
     }
 
@@ -95,16 +101,13 @@ public class UserProfileEditViewModelTest {
         userProfileId = "ghi";
         userProfile = new UserProfile(userProfileId);
         Mockito.when(this.userProfilesService.createModel()).thenReturn(userProfile);
-        Mockito.when(this.userProfilesImagesService.getUserImage(any(UserProfile.class))).thenAnswer(new Answer<Bitmap>() {
-            @Override
-            public Bitmap answer(InvocationOnMock invocation) {
-                UserProfile up = invocation.getArgument(0);
-                if (up.getImageFilePath() != null && !up.getImageFilePath().isEmpty()) {
-                    return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
-                }
-                // default userImage is a 200x200
-                return Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_4444);
+        Mockito.when(this.userProfilesImagesService.getUserImage(any(UserProfile.class))).thenAnswer((Answer<Bitmap>) invocation -> {
+            UserProfile up = invocation.getArgument(0);
+            if (up.getImageFilePath() != null && !up.getImageFilePath().isEmpty()) {
+                return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
             }
+            // default userImage is a 200x200
+            return Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_4444);
         });
     }
 

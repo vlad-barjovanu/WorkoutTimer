@@ -7,6 +7,8 @@ import androidx.lifecycle.Observer;
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfile;
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfilesList;
 import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesService;
+import com.vbarjovanu.workouttimer.preferences.IFileRepositoryPreferences;
+import com.vbarjovanu.workouttimer.preferences.IWorkoutTimerPreferences;
 import com.vbarjovanu.workouttimer.session.IApplicationSession;
 import com.vbarjovanu.workouttimer.ui.generic.events.SingleLiveEvent;
 
@@ -71,7 +73,11 @@ public class UserProfilesViewModelTest {
     }
 
     private void setupMockedAppSession() {
-        Mockito.when(this.applicationSession.getFileRepositoriesFolderPath()).thenReturn(folder.getRoot().getAbsolutePath());
+        IWorkoutTimerPreferences workoutTimerPreferences = mock(IWorkoutTimerPreferences.class);
+        IFileRepositoryPreferences fileRepositoryPreferences= mock(IFileRepositoryPreferences.class);
+        Mockito.when(this.applicationSession.getWorkoutTimerPreferences()).thenReturn(workoutTimerPreferences);
+        Mockito.when(workoutTimerPreferences.getFileRepositoryPreferences()).thenReturn(fileRepositoryPreferences);
+        Mockito.when(fileRepositoryPreferences.getFolderPath()).thenReturn(folder.getRoot().getAbsolutePath());
         Mockito.when(this.applicationSession.getUserProfileId()).thenReturn("123");
     }
 

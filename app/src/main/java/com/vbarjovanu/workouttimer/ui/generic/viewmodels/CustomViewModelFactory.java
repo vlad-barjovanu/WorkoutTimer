@@ -30,13 +30,16 @@ import com.vbarjovanu.workouttimer.ui.workouts.edit.IWorkoutEditViewModel;
 import com.vbarjovanu.workouttimer.ui.workouts.edit.WorkoutEditViewModel;
 import com.vbarjovanu.workouttimer.ui.workouts.list.IWorkoutsViewModel;
 import com.vbarjovanu.workouttimer.ui.workouts.list.WorkoutsViewModel;
+import com.vbarjovanu.workouttimer.ui.workouts.training.IWorkoutTrainingViewModel;
+import com.vbarjovanu.workouttimer.ui.workouts.training.WorkoutTrainingViewModel;
+import com.vbarjovanu.workouttimer.ui.workouts.training.logic.WorkoutTrainingTimer;
 
 public class CustomViewModelFactory implements ViewModelProvider.Factory {
     private IFileRepositorySettings fileRepositorySettings;
     private Application application;
 
     public static CustomViewModelFactory getInstance(@NonNull Application application) {
-        String folderPath = ApplicationSessionFactory.getApplicationSession(application.getApplicationContext()).getFileRepositoriesFolderPath();
+        String folderPath = ApplicationSessionFactory.getApplicationSession(application.getApplicationContext()).getWorkoutTimerPreferences().getFileRepositoryPreferences().getFolderPath();
         return new CustomViewModelFactory(application, new FileRepositorySettings(folderPath));
     }
 
@@ -76,6 +79,10 @@ public class CustomViewModelFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(IWorkoutEditViewModel.class)) {
             //noinspection unchecked
             return (T) new WorkoutEditViewModel(this.getApplicationSession(), this.getWorkoutsService());
+        }
+        if (modelClass.isAssignableFrom(IWorkoutTrainingViewModel.class)) {
+            //noinspection unchecked
+            return (T) new WorkoutTrainingViewModel(this.getApplicationSession(), this.getWorkoutsService(), new WorkoutTrainingTimer());
         }
         if (modelClass.isAssignableFrom(IUserProfilesViewModel.class)) {
             //noinspection unchecked

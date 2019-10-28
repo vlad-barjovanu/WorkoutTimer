@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.vbarjovanu.workouttimer.ui.workouts.edit.WorkoutEditFragment">
+
+    <data>
+
+        <import type="com.vbarjovanu.workouttimer.helpers.formatters.DurationFormatter" />
+
+        <import type="com.vbarjovanu.workouttimer.helpers.converters.VisibilityBooleanConverter" />
+
+        <import type="com.vbarjovanu.workouttimer.helpers.converters.WorkoutTrainingItemTypeStringConverter" />
+
+        <import type="com.vbarjovanu.workouttimer.helpers.converters.StringIntegerConverter" />
+
+        <import type="com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingModel" />
+
+        <import type="com.vbarjovanu.workouttimer.ui.workouts.training.WorkoutTrainingFragmentClickListners" />
+
+        <variable
+            name="workoutTrainingModel"
+            type="WorkoutTrainingModel" />
+
+        <variable
+            name="clickListners"
+            type="WorkoutTrainingFragmentClickListners" />
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@{workoutTrainingModel.getColor(workoutTrainingModel.currentWorkoutTrainingItem)}">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fragment_workout_training_layout_first_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/fragment_workout_training_button_lock"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:contentDescription="@string/lock"
+                android:src="@android:drawable/ic_lock_idle_lock"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/fragment_workout_training_layout_play_pause"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/start_workout"
+                    android:onClick="@{(v)->clickListners.onStartClick(v)}"
+                    android:src="@android:drawable/ic_media_play"
+                    android:visibility="@{VisibilityBooleanConverter.booleanToVisibility(!workoutTrainingModel.inTraining)}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/pause_workout"
+                    android:onClick="@{(v)->clickListners.onPauseClick(v)}"
+                    android:src="@android:drawable/ic_media_pause"
+                    android:visibility="@{VisibilityBooleanConverter.booleanToVisibility(workoutTrainingModel.inTraining)}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_total_remaining_duration"
+                android:text="@{DurationFormatter.formatSeconds(workoutTrainingModel.totalRemainingDuration)}"
+                android:textAlignment="center"
+                android:textSize="30sp"
+                app:layout_constraintEnd_toStartOf="@id/fragment_workout_training_layout_play_pause"
+                app:layout_constraintStart_toEndOf="@id/fragment_workout_training_button_lock"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/fragment_workout_training_textview_current_item_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_item_type"
+            android:text="@{WorkoutTrainingItemTypeStringConverter.WorkoutTrainingItemTypeToString(context, workoutTrainingModel.currentWorkoutTrainingItem.type)}"
+            android:textAlignment="center"
+            android:textSize="40sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_workout_training_layout_first_row" />
+
+        <TextView
+            android:id="@+id/fragment_workout_training_textview_current_item_duration"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_duration"
+            android:text="@{StringIntegerConverter.integerToString(workoutTrainingModel.currentWorkoutTrainingItem.duration)}"
+            android:textAlignment="center"
+            android:textSize="120sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_workout_training_textview_current_item_type" />
+
+
+        <ImageButton
+            android:id="@+id/fragment_workout_training_button_previous_item"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/previous_workout_item"
+            android:onClick="@{(v)->clickListners.onPreviousWorkoutItemClick(v)}"
+            android:src="@android:drawable/ic_media_previous"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/fragment_workout_training_textview_cycle_index"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_workout_training_fragment_cycle_index"
+            android:text="@{@string/message_workout_training_fragment_cycle_index(workoutTrainingModel.currentWorkoutTrainingItem.cycleIndex, workoutTrainingModel.workout.cyclesCount)}"
+            android:textAlignment="center"
+            android:textSize="40sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/fragment_workout_training_textview_set_index"
+            app:layout_constraintStart_toEndOf="@id/fragment_workout_training_button_previous_item" />
+
+        <TextView
+            android:id="@+id/fragment_workout_training_textview_set_index"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_workout_training_fragment_set_index"
+            android:text="@{@string/message_workout_training_fragment_set_index(workoutTrainingModel.currentWorkoutTrainingItem.setIndex, workoutTrainingModel.workout.setsCount)}"
+            android:textAlignment="center"
+            android:textSize="40sp"
+            android:visibility="@{VisibilityBooleanConverter.booleanToVisibility(workoutTrainingModel.workout.setsCount &gt; 1)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/fragment_workout_training_button_next_item"
+            app:layout_constraintStart_toEndOf="@id/fragment_workout_training_textview_cycle_index" />
+
+        <ImageButton
+            android:id="@+id/fragment_workout_training_button_next_item"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/next_workout_item"
+            android:onClick="@{(v)->clickListners.onNextWorkoutItemClick(v)}"
+            android:src="@android:drawable/ic_media_next"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

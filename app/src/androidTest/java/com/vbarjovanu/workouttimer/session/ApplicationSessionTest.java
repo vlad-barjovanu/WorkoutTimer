@@ -6,6 +6,9 @@ import android.preference.PreferenceManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.vbarjovanu.workouttimer.preferences.IWorkoutTimerPreferences;
+import com.vbarjovanu.workouttimer.preferences.WorkoutTimerPreferences;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -27,36 +30,35 @@ public class ApplicationSessionTest {
     public void setup() {
         // use the App context (getTargetContext) - otherwise repo folder can't be created
         this.context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context);
-        // clear all prev stored preferences, so unit tests are run clean
-        sharedPreferences.edit().clear().commit();
-        this.applicationSession = new ApplicationSession(this.context);
+        IWorkoutTimerPreferences preferences = new WorkoutTimerPreferences(context);
+        preferences.clear();
+        this.applicationSession = new ApplicationSession(preferences);
     }
 
     @Test
     public void setFileRepositoriesFolderPath() throws FileNotFoundException {
-        this.applicationSession.setFileRepositoriesFolderPath(this.folder.getRoot().getAbsolutePath());
+        this.applicationSession.getWorkoutTimerPreferences().getFileRepositoryPreferences().setFolderPath(this.folder.getRoot().getAbsolutePath());
         Assert.assertTrue(true);
     }
 
     @Test(expected = FileNotFoundException.class)
     public void setFileRepositoriesFolderPathInvalid() throws FileNotFoundException {
-        this.applicationSession.setFileRepositoriesFolderPath("dingo");
+        this.applicationSession.getWorkoutTimerPreferences().getFileRepositoryPreferences().setFolderPath("dingo");
     }
 
     @Test
     public void getFileRepositoriesFolderPath() {
-        Assert.assertNotNull(this.applicationSession.getFileRepositoriesFolderPath());
-        Assert.assertEquals(this.context.getDir("FileRepositories", Context.MODE_APPEND).getAbsolutePath(), this.applicationSession.getFileRepositoriesFolderPath());
+        Assert.assertNotNull(this.applicationSession.getWorkoutTimerPreferences().getFileRepositoryPreferences().getFolderPath());
+        Assert.assertEquals(this.context.getDir("FileRepositories", Context.MODE_APPEND).getAbsolutePath(), this.applicationSession.getWorkoutTimerPreferences().getFileRepositoryPreferences().getFolderPath());
     }
 
     @Test
     public void getFileRepositoriesFolderPathValid() throws FileNotFoundException {
         String folderPath;
         folderPath = this.folder.getRoot().getAbsolutePath();
-        this.applicationSession.setFileRepositoriesFolderPath(folderPath);
-        Assert.assertNotNull(this.applicationSession.getFileRepositoriesFolderPath());
-        Assert.assertEquals(folderPath, this.applicationSession.getFileRepositoriesFolderPath());
+        this.applicationSession.getWorkoutTimerPreferences().getFileRepositoryPreferences().setFolderPath(folderPath);
+        Assert.assertNotNull(this.applicationSession.getWorkoutTimerPreferences().getFileRepositoryPreferences().getFolderPath());
+        Assert.assertEquals(folderPath, this.applicationSession.getWorkoutTimerPreferences().getFileRepositoryPreferences().getFolderPath());
     }
 
     @Test

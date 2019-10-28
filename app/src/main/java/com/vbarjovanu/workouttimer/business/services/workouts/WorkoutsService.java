@@ -21,6 +21,7 @@ public class WorkoutsService extends ModelsService<Workout, WorkoutsList> implem
         int color = colors[new Random().nextInt(colors.length)];
         Workout workout = super.createModel();
         workout.setColor(color);
+        workout.setIncreaseDuration(false);
         return workout;
     }
 

@@ -21,9 +21,11 @@ public class Workout implements IModel<Workout> {
     private Integer restBetweenSetsDuration;
     private Integer coolDownDuration;
     private int color;
+    private boolean increaseDuration;
 
     public Workout(String id) {
         this.setId(id);
+        this.setIncreaseDuration(false);
     }
 
     public String getId() {
@@ -143,6 +145,15 @@ public class Workout implements IModel<Workout> {
         return this;
     }
 
+    public boolean isIncreaseDuration() {
+        return this.increaseDuration;
+    }
+
+    public Workout setIncreaseDuration(boolean increaseDuration) {
+        this.increaseDuration = increaseDuration;
+        return this;
+    }
+
     /**
      * Update all workout properties from referenced workout
      *
@@ -164,7 +175,8 @@ public class Workout implements IModel<Workout> {
                 .setSetsCount(workout.getSetsCount())
                 .setRestBetweenSetsDuration(workout.getRestBetweenSetsDuration())
                 .setCoolDownDuration(workout.getCoolDownDuration())
-                .setColor(workout.getColor());
+                .setColor(workout.getColor())
+                .setIncreaseDuration(workout.isIncreaseDuration());
     }
 
     @Override

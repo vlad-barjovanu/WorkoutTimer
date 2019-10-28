@@ -13,6 +13,7 @@ import com.vbarjovanu.workouttimer.ui.userprofiles.images.IUserProfilesImagesSer
 import com.vbarjovanu.workouttimer.ui.userprofiles.list.IUserProfilesViewModel;
 import com.vbarjovanu.workouttimer.ui.workouts.edit.IWorkoutEditViewModel;
 import com.vbarjovanu.workouttimer.ui.workouts.list.IWorkoutsViewModel;
+import com.vbarjovanu.workouttimer.ui.workouts.training.IWorkoutTrainingViewModel;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -67,6 +68,13 @@ public class CustomViewModelFactoryTest {
         IWorkoutEditViewModel model = this.factory.create(IWorkoutEditViewModel.class);
         assertNotNull(model);
         assertThat(model, isA(IWorkoutEditViewModel.class));
+    }
+
+    @Test
+    public void createIWorkoutTrainingViewModel() {
+        IWorkoutTrainingViewModel model = this.factory.create(IWorkoutTrainingViewModel.class);
+        assertNotNull(model);
+        assertThat(model, isA(IWorkoutTrainingViewModel.class));
     }
 
     @Test

@@ -32,6 +32,13 @@
             app:destination="@id/nav_workout_edit"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_nav_workouts_to_nav_workout_training"
+            app:destination="@id/nav_workout_training"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 
     <fragment
@@ -91,5 +98,17 @@
             app:destination="@id/nav_workouts"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_workout_training"
+        android:name="com.vbarjovanu.workouttimer.ui.workouts.training.WorkoutTrainingFragment"
+        android:label="Workout Training">
+        <action
+            android:id="@+id/action_nav_workout_training_to_nav_workouts"
+            app:destination="@id/nav_workouts"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
 </navigation>

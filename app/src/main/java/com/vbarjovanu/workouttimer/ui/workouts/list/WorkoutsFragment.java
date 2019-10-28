@@ -31,7 +31,6 @@ import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 public class WorkoutsFragment extends Fragment {
 
     private IMainActivityViewModel mainActivityViewModel;
-    //    private WorkoutsAdapter workoutsAdapter;
     private WorkoutsRecyclerViewAdapter workoutsAdapter;
     private IWorkoutsViewModel workoutsViewModel;
     private RecyclerView recyclerView;
@@ -81,18 +80,15 @@ public class WorkoutsFragment extends Fragment {
     private void deleteWorkoutClicked(final String workoutId) {
         final String profileId = ApplicationSessionFactory.getApplicationSession(this.getContext()).getUserProfileId();
 
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        workoutsViewModel.deleteWorkout(profileId, workoutId);
-                        break;
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    workoutsViewModel.deleteWorkout(profileId, workoutId);
+                    break;
 
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
-                }
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
             }
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -107,7 +103,8 @@ public class WorkoutsFragment extends Fragment {
     }
 
     private void playWorkoutClicked(String workoutId) {
-        Toast.makeText(getContext(), "Play workout clicked", Toast.LENGTH_SHORT).show();
+        final String profileId = ApplicationSessionFactory.getApplicationSession(this.getContext()).getUserProfileId();
+        workoutsViewModel.trainWorkout(profileId, workoutId);
     }
 
     private void removeWorkoutsAdapterActionObserver() {
@@ -118,13 +115,7 @@ public class WorkoutsFragment extends Fragment {
     }
 
     private void addWorkoutsAdapterItemActionObserver() {
-        this.workoutsAdapterItemActionObserver = new Observer<RecyclerViewItemActionData<WorkoutsRecyclerViewItemAction>>() {
-            @Override
-            public void onChanged(RecyclerViewItemActionData<WorkoutsRecyclerViewItemAction> workoutActionData) {
-                onWorkoutsRecyclerViewItemActionDataChanged(workoutActionData);
-            }
-        };
-
+        this.workoutsAdapterItemActionObserver = this::onWorkoutsRecyclerViewItemActionDataChanged;
         this.workoutsAdapter.getItemAction().observe(this, this.workoutsAdapterItemActionObserver);
     }
 
@@ -150,12 +141,7 @@ public class WorkoutsFragment extends Fragment {
     }
 
     private void addWorkoutsViewModelWorkoutsObserver() {
-        this.workoutsListObserver = new Observer<WorkoutsList>() {
-            @Override
-            public void onChanged(WorkoutsList workouts) {
-                WorkoutsFragment.this.onWorkoutsListChanged(workouts);
-            }
-        };
+        this.workoutsListObserver = WorkoutsFragment.this::onWorkoutsListChanged;
         this.workoutsViewModel.getWorkouts().observe(this, this.workoutsListObserver);
     }
 
@@ -167,12 +153,7 @@ public class WorkoutsFragment extends Fragment {
     }
 
     private void addWorkoutsViewModelActionDataObserver() {
-        this.workoutsViewModelActionDataObserver = new Observer<WorkoutsFragmentActionData>() {
-            @Override
-            public void onChanged(WorkoutsFragmentActionData workoutsFragmentActionData) {
-                onWorkoutsFragmentActionDataChanged(workoutsFragmentActionData);
-            }
-        };
+        this.workoutsViewModelActionDataObserver = this::onWorkoutsFragmentActionDataChanged;
         this.workoutsViewModel.getActionData().observe(this, this.workoutsViewModelActionDataObserver);
     }
 
@@ -184,13 +165,7 @@ public class WorkoutsFragment extends Fragment {
     }
 
     private void addMainActivityActionObserver() {
-        this.mainActivityViewModelObserver = new Observer<EventContent<MainActivityActionData>>() {
-            @Override
-            public void onChanged(EventContent<MainActivityActionData> eventContent) {
-                onMainActivityActionDataChanged(eventContent);
-            }
-        };
-
+        this.mainActivityViewModelObserver = this::onMainActivityActionDataChanged;
         this.mainActivityViewModel.getAction().observe(this, this.mainActivityViewModelObserver);
     }
 
@@ -249,6 +224,12 @@ public class WorkoutsFragment extends Fragment {
                 args.putString("profileId", workoutsFragmentActionData.getProfileId());
                 args.putString("workoutId", workoutsFragmentActionData.getWorkoutId());
                 navController.navigate(R.id.action_nav_workouts_to_nav_workout_edit, args);
+                break;
+            case GOTO_WORKOUT_TRAINING:
+                args = new Bundle(2);
+                args.putString("profileId", workoutsFragmentActionData.getProfileId());
+                args.putString("workoutId", workoutsFragmentActionData.getWorkoutId());
+                navController.navigate(R.id.action_nav_workouts_to_nav_workout_training, args);
                 break;
             case DISPLAY_WORKOUT_DELETE_FAILED:
                 Toast.makeText(getContext(), "Workout delete has failed", Toast.LENGTH_SHORT).show();

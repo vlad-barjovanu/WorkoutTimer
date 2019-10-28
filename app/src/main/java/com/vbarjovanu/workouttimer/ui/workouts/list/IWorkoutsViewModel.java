@@ -40,6 +40,13 @@ public abstract class IWorkoutsViewModel extends ViewModel implements ISynchroni
     public abstract void editWorkout(String profileId, String workoutId);
 
     /**
+     * starts training for a workout
+     * @param profileId ID of the user profile
+     * @param workoutId ID of the workout to be edited
+     */
+    public abstract void trainWorkout(String profileId, String workoutId);
+
+    /**
      * deletes a workout
      * @param profileId ID of the user profile
      * @param workoutId ID of the workout to be deleted

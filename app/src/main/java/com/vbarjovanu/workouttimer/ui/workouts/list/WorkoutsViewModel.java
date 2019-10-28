@@ -62,12 +62,20 @@ public class WorkoutsViewModel extends IWorkoutsViewModel {
     }
 
     @Override
+    public void trainWorkout(String profileId, String workoutId) {
+        Workout workout = null;
+        WorkoutsList workoutsList = this.getWorkouts().getValue();
+        if (workoutsList != null) {
+            workout = workoutsList.find(workoutId);
+        }
+        if (workout != null) {
+            this.actionData.setValue(new WorkoutsFragmentActionData(WorkoutsFragmentAction.GOTO_WORKOUT_TRAINING, profileId, workoutId));
+        }
+    }
+
+    @Override
     public void deleteWorkout(String profileId, String workoutId) {
         new DeleteAsyncTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, profileId, workoutId);
-//
-//        if (this.workoutsService.deleteModel(profileId, workoutId)) {
-//            this.loadWorkouts(profileId);
-//        }
     }
 
     @Override
