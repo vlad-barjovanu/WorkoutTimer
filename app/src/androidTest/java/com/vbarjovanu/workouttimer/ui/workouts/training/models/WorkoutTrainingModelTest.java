@@ -2,8 +2,6 @@ package com.vbarjovanu.workouttimer.ui.workouts.training.models;
 
 import com.vbarjovanu.workouttimer.business.models.workouts.Workout;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -28,91 +26,114 @@ public class WorkoutTrainingModelTest {
     }
 
     private WorkoutTrainingModel buildDefaultWorkoutTrainingModel(Workout workout, boolean includeLastRest) {
-        HashMap<WorkoutTrainingItemType, Integer> colors;
-        colors = new HashMap<>();
-        colors.put(WorkoutTrainingItemType.PREPARE, 0);
-        colors.put(WorkoutTrainingItemType.WORK, 1);
-        colors.put(WorkoutTrainingItemType.REST, 2);
-        colors.put(WorkoutTrainingItemType.SET_REST, 3);
-        colors.put(WorkoutTrainingItemType.COOL_DOWN, 4);
-        return new WorkoutTrainingModel(workout, includeLastRest, colors);
+        return new WorkoutTrainingModel(workout, includeLastRest);
     }
 
     @Test
-    public void getTotalDuration() {
+    public void getTotalInitialDuration() {
         /*
          * all values are set
          */
         WorkoutTrainingModel model;
         model = this.buildDefaultWorkoutTrainingModel(this.buildDefaultWorkout(), true);
-        assertEquals(345, model.getTotalDuration());
+        assertEquals(345, model.getTotalInitialDuration());
         model = this.buildDefaultWorkoutTrainingModel(this.buildDefaultWorkout(), false);
-        assertEquals(310, model.getTotalDuration());
+        assertEquals(310, model.getTotalInitialDuration());
     }
 
     @Test
-    public void getTotalDurationWithoutRest() {
+    public void getTotalInitialDurationWithoutRest() {
         /*
          * rest value is missing - assumed 0
          */
         WorkoutTrainingModel model;
         Workout workout = this.buildDefaultWorkout().setRestDuration(null);
         model = this.buildDefaultWorkoutTrainingModel(workout, true);
-        assertEquals(270, model.getTotalDuration());
+        assertEquals(270, model.getTotalInitialDuration());
         model = this.buildDefaultWorkoutTrainingModel(workout, false);
-        assertEquals(250, model.getTotalDuration());
+        assertEquals(250, model.getTotalInitialDuration());
     }
 
     @Test
-    public void getTotalDurationWithoutWork() {
+    public void getTotalInitialDurationWithoutWork() {
         /*
          * work value is missing - assumed 0
          */
         WorkoutTrainingModel model;
         Workout workout = this.buildDefaultWorkout().setWorkDuration(null);
         model = this.buildDefaultWorkoutTrainingModel(workout, true);
-        assertEquals(195, model.getTotalDuration());
+        assertEquals(195, model.getTotalInitialDuration());
         model = this.buildDefaultWorkoutTrainingModel(workout, false);
-        assertEquals(160, model.getTotalDuration());
+        assertEquals(160, model.getTotalInitialDuration());
     }
 
     @Test
-    public void getTotalDurationWithoutCyclesCount() {
+    public void getTotalInitialDurationWithoutCyclesCount() {
         /*
          * cycles count value is missing - assumed 0
          */
         WorkoutTrainingModel model;
         Workout workout = this.buildDefaultWorkout().setCyclesCount(null);
         model = this.buildDefaultWorkoutTrainingModel(workout, true);
-        assertEquals(120, model.getTotalDuration());
+        assertEquals(120, model.getTotalInitialDuration());
         model = this.buildDefaultWorkoutTrainingModel(workout, false);
-        assertEquals(100, model.getTotalDuration());
+        assertEquals(100, model.getTotalInitialDuration());
     }
 
     @Test
-    public void getTotalDurationWithoutSetsCount() {
+    public void getTotalInitialDurationWithoutSetsCount() {
         /*
          * sets count value is missing - assumed 0
          */
         WorkoutTrainingModel model;
         Workout workout = this.buildDefaultWorkout().setSetsCount(null);
         model = this.buildDefaultWorkoutTrainingModel(workout, true);
-        assertEquals(60, model.getTotalDuration());
+        assertEquals(60, model.getTotalInitialDuration());
         model = this.buildDefaultWorkoutTrainingModel(workout, false);
-        assertEquals(60, model.getTotalDuration());
+        assertEquals(60, model.getTotalInitialDuration());
     }
 
     @Test
-    public void getTotalDurationWithoutPrepareAndCoolDownDuration() {
+    public void getTotalInitialDurationWithoutPrepareAndCoolDownDuration() {
         /*
          * sets count value is missing - assumed 0
          */
         WorkoutTrainingModel model;
         Workout workout = this.buildDefaultWorkout().setPrepareDuration(null).setCoolDownDuration(null);
         model = this.buildDefaultWorkoutTrainingModel(workout, true);
-        assertEquals(285, model.getTotalDuration());
+        assertEquals(285, model.getTotalInitialDuration());
         model = this.buildDefaultWorkoutTrainingModel(workout, false);
-        assertEquals(250, model.getTotalDuration());
+        assertEquals(250, model.getTotalInitialDuration());
+    }
+
+    @Test
+    public void getTotalRemainingDuration() {
+        /*
+         * all values are set
+         */
+        WorkoutTrainingModel model;
+        Workout workout;
+        workout = this.buildDefaultWorkout();
+        workout.setIncreaseDuration(false);
+        model = this.buildDefaultWorkoutTrainingModel(workout, true);
+        assertEquals(345, model.getTotalRemainingDuration());
+        model.getCurrentWorkoutTrainingItem().alterDuration();
+        assertEquals(344, model.getTotalRemainingDuration());
+        model = this.buildDefaultWorkoutTrainingModel(workout, false);
+        assertEquals(310, model.getTotalRemainingDuration());
+        model.getCurrentWorkoutTrainingItem().alterDuration();
+        assertEquals(309, model.getTotalRemainingDuration());
+
+
+        workout.setIncreaseDuration(true);
+        model = this.buildDefaultWorkoutTrainingModel(workout, true);
+        assertEquals(345, model.getTotalRemainingDuration());
+        model.getCurrentWorkoutTrainingItem().alterDuration();
+        assertEquals(344, model.getTotalRemainingDuration());
+        model = this.buildDefaultWorkoutTrainingModel(workout, false);
+        assertEquals(310, model.getTotalRemainingDuration());
+        model.getCurrentWorkoutTrainingItem().alterDuration();
+        assertEquals(309, model.getTotalRemainingDuration());
     }
 
     @Test
@@ -188,5 +209,49 @@ public class WorkoutTrainingModelTest {
         model = this.buildDefaultWorkoutTrainingModel(workout, true);
         assertTrue(model.goToTrainingItem(34));
         assertFalse(model.goToTrainingItem(35));
+    }
+
+    @Test
+    public void setInTraining() {
+        WorkoutTrainingModel model;
+        Workout workout = this.buildDefaultWorkout();
+        model = this.buildDefaultWorkoutTrainingModel(workout, true);
+        model.setInTraining(false);
+        assertFalse(model.isInTraining());
+        model.setInTraining(true);
+        assertTrue(model.isInTraining());
+    }
+
+    @Test
+    public void setLocked() {
+        WorkoutTrainingModel model;
+        Workout workout = this.buildDefaultWorkout();
+        model = this.buildDefaultWorkoutTrainingModel(workout, true);
+        model.setLocked(false);
+        assertFalse(model.isLocked());
+        model.setLocked(true);
+        assertTrue(model.isLocked());
+    }
+
+    @Test
+    public void setSoundOn() {
+        WorkoutTrainingModel model;
+        Workout workout = this.buildDefaultWorkout();
+        model = this.buildDefaultWorkoutTrainingModel(workout, true);
+        model.setSoundOn(false);
+        assertFalse(model.isSoundOn());
+        model.setSoundOn(true);
+        assertTrue(model.isSoundOn());
+    }
+
+    @Test
+    public void setVibrateOn() {
+        WorkoutTrainingModel model;
+        Workout workout = this.buildDefaultWorkout();
+        model = this.buildDefaultWorkoutTrainingModel(workout, true);
+        model.setVibrateOn(false);
+        assertFalse(model.isVibrateOn());
+        model.setVibrateOn(true);
+        assertTrue(model.isVibrateOn());
     }
 }

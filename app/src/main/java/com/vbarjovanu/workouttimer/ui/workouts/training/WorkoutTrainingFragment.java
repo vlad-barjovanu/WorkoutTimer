@@ -1,5 +1,6 @@
 package com.vbarjovanu.workouttimer.ui.workouts.training;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,18 +15,20 @@ import com.vbarjovanu.workouttimer.IMainActivityViewModel;
 import com.vbarjovanu.workouttimer.MainActivityActionData;
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.databinding.FragmentWorkoutTrainingBinding;
+import com.vbarjovanu.workouttimer.helpers.vibration.VibrationHelper;
 import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
-import com.vbarjovanu.workouttimer.ui.workouts.edit.WorkoutEditFragmentAction;
+import com.vbarjovanu.workouttimer.ui.workouts.training.actions.DurationChangeActionData;
+import com.vbarjovanu.workouttimer.ui.workouts.training.actions.WorkoutTrainingActionData;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingModel;
 
 public class WorkoutTrainingFragment extends Fragment implements WorkoutTrainingFragmentClickListners {
 
-    private IWorkoutTrainingViewModel workoutEditViewModel;
+    private IWorkoutTrainingViewModel viewModel;
     private IMainActivityViewModel mainActivityViewModel;
     private FragmentWorkoutTrainingBinding binding;
     private Observer<? super WorkoutTrainingModel> workoutObserver;
-    private Observer<? super WorkoutEditFragmentAction> actionObserver;
+    private Observer<? super WorkoutTrainingActionData> actionObserver;
     private Observer<? super EventContent<MainActivityActionData>> mainActivityActionObserver;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -33,9 +36,9 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
         View root = null;
 
         if (this.getActivity() != null) {
-            this.workoutEditViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IWorkoutTrainingViewModel.class);
+            this.viewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IWorkoutTrainingViewModel.class);
             this.addWorkoutTrainingModelObserver();
-//            this.addViewModelActionObserver();
+            this.addViewModelActionObserver();
             this.mainActivityViewModel = ViewModelProviders.of(this.getActivity(), CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
             this.mainActivityViewModel.showNewEntityButton(false);
             this.mainActivityViewModel.showSaveEntityButton(false);
@@ -44,6 +47,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             root = inflater.inflate(R.layout.fragment_workout_training, container, false);
             this.binding = FragmentWorkoutTrainingBinding.bind(root);
             this.binding.setClickListners(this);
+            this.binding.setWorkoutTrainingItemColorProvider(this.viewModel.getWorkoutTrainingItemColorProvider());
 
             this.loadWorkout();
         }
@@ -54,15 +58,15 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     public void onDestroyView() {
         super.onDestroyView();
 
-        this.workoutEditViewModel.stopWorkoutTraining();
-        this.workoutEditViewModel.close();
+        this.viewModel.stopWorkoutTraining();
+        this.viewModel.close();
     }
 
     private void loadWorkout() {
         if (this.getArguments() != null && this.getArguments().containsKey("workoutId")) {
             String workoutId = this.getArguments().getString("workoutId");
             if (workoutId != null) {
-                this.workoutEditViewModel.loadWorkout(workoutId);
+                this.viewModel.loadWorkout(workoutId);
             }
         }
     }
@@ -71,43 +75,73 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     public void onDestroy() {
         super.onDestroy();
         this.removeWorkoutTrainingModelObserver();
-//        this.removeViewModelActionObserver();
+        this.removeViewModelActionObserver();
         this.removeMainActivityViewModelActionObserver();
     }
 
     private void removeWorkoutTrainingModelObserver() {
-        if (this.workoutEditViewModel != null && this.workoutObserver != null) {
-            this.workoutEditViewModel.getWorkoutTrainingModel().removeObserver(this.workoutObserver);
+        if (this.viewModel != null && this.workoutObserver != null) {
+            this.viewModel.getWorkoutTrainingModel().removeObserver(this.workoutObserver);
             this.workoutObserver = null;
         }
     }
 
     private void addWorkoutTrainingModelObserver() {
         this.workoutObserver = (Observer<WorkoutTrainingModel>) WorkoutTrainingFragment.this::onWorkoutChanged;
-        this.workoutEditViewModel.getWorkoutTrainingModel().observe(this, this.workoutObserver);
+        this.viewModel.getWorkoutTrainingModel().observe(this, this.workoutObserver);
     }
 
     private void onWorkoutChanged(WorkoutTrainingModel workoutTrainingModel) {
         this.binding.setWorkoutTrainingModel(workoutTrainingModel);
     }
 
-//
-//    private void removeViewModelActionObserver() {
-//        if (this.workoutEditViewModel != null && this.actionObserver != null) {
-//            this.workoutEditViewModel.getAction().removeObserver(this.actionObserver);
-//            this.actionObserver = null;
-//        }
-//    }
+    @SuppressWarnings("ConstantConditions")
+    private <T extends WorkoutTrainingActionData> void onActionChanged(T actionData) {
+        DurationChangeActionData durationChangeActionData;
+        Integer soundId = null;
+        if (actionData != null) {
+            if (actionData instanceof DurationChangeActionData) {
+                durationChangeActionData = (DurationChangeActionData) actionData;
+                switch (durationChangeActionData.getAction()) {
+                    case MARK_START_WORK:
+                        soundId = R.raw.start_work_sound;
+                        break;
+                    case MARK_START_REST:
+                        soundId = R.raw.start_rest_sound;
+                        break;
+                    case MARK_DURATION_CHANGE:
+                        soundId = R.raw.duration_sound;
+                        break;
+                }
 
-//    private void addViewModelActionObserver() {
-//        this.actionObserver = new Observer<WorkoutEditFragmentAction>() {
-//            @Override
-//            public void onChanged(WorkoutEditFragmentAction workoutEditFragmentAction) {
-//                onActionChanged(workoutEditFragmentAction);
-//            }
-//        };
-//        this.workoutEditViewModel.getAction().observe(this, this.actionObserver);
-//    }
+                if (soundId != null && durationChangeActionData.isPlaySound()) {
+                    this.playSound(soundId);
+                }
+                if (durationChangeActionData.isVibrate()) {
+                    VibrationHelper.vibrate(this.getContext(), 300);
+                }
+            }
+        }
+    }
+
+    private void playSound(int soundId) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(this.getContext(), soundId);
+        mediaPlayer.start();
+        //noinspection Convert2MethodRef
+        mediaPlayer.setOnCompletionListener(mp -> mp.release());
+    }
+
+    private void removeViewModelActionObserver() {
+        if (this.viewModel != null && this.actionObserver != null) {
+            this.viewModel.getAction().removeObserver(this.actionObserver);
+            this.actionObserver = null;
+        }
+    }
+
+    private void addViewModelActionObserver() {
+        this.actionObserver = (Observer<WorkoutTrainingActionData>) this::onActionChanged;
+        this.viewModel.getAction().observe(this, this.actionObserver);
+    }
 
     private void removeMainActivityViewModelActionObserver() {
         if (this.mainActivityViewModel != null && this.mainActivityActionObserver != null) {
@@ -127,22 +161,37 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
 
 
     @Override
+    public void onSoundClick(View view) {
+        this.viewModel.toggleSound();
+    }
+
+    @Override
+    public void onVibrateClick(View view) {
+        this.viewModel.toggleVibrate();
+    }
+
+    @Override
+    public void onLockClick(View view) {
+        this.viewModel.toggleLock();
+    }
+
+    @Override
     public void onPauseClick(View view) {
-        this.workoutEditViewModel.pauseWorkoutTraining();
+        this.viewModel.pauseWorkoutTraining();
     }
 
     @Override
     public void onStartClick(View view) {
-        this.workoutEditViewModel.startWorkoutTraining();
+        this.viewModel.startWorkoutTraining();
     }
 
     @Override
     public void onNextWorkoutItemClick(View view) {
-        this.workoutEditViewModel.nextWorkoutTrainingItem();
+        this.viewModel.nextWorkoutTrainingItem();
     }
 
     @Override
     public void onPreviousWorkoutItemClick(View view) {
-        this.workoutEditViewModel.previousWorkoutTrainingItem();
+        this.viewModel.previousWorkoutTrainingItem();
     }
 }

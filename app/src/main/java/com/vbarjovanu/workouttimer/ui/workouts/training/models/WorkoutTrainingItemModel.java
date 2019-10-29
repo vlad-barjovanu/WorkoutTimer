@@ -62,6 +62,27 @@ public class WorkoutTrainingItemModel extends BaseObservable {
         return duration.get();
     }
 
+    @SuppressWarnings("WeakerAccess")
+    @Bindable
+    public int getInitialDuration() {
+        return initialDuration;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    @Bindable
+    public int getRemainingDuration() {
+        if (this.increaseDuration) {
+            return this.getInitialDuration() - this.getDuration();
+        } else {
+            return this.getDuration();
+        }
+    }
+
+    @Bindable
+    public int getCompletedDuration() {
+        return this.getInitialDuration() - this.getRemainingDuration();
+    }
+
     @Bindable
     @NonNull
     public String getDescription() {
@@ -128,6 +149,19 @@ public class WorkoutTrainingItemModel extends BaseObservable {
     }
 
     /**
+     * Checks if the workout training item is at start (duration was altered zero times since initial duration)
+     * When increaseDuration flag is true it means the current value equals 0
+     * When increaseDuration flag is false it means the current value equals the initial duration
+     *
+     * @return true if training is complete
+     */
+    public boolean isAtStart() {
+        return (this.increaseDuration && this.getDuration() == 0)
+                ||
+                (!this.increaseDuration && this.getDuration() == this.initialDuration);
+    }
+
+    /**
      * Checks if the workout training item is complete (duration was altered enough times till completion)
      * When increaseDuration flag is true it means the current value equals the initial duration
      * When increaseDuration flag is false it means the current value equals 0
@@ -138,5 +172,18 @@ public class WorkoutTrainingItemModel extends BaseObservable {
         return (this.increaseDuration && this.getDuration() == this.initialDuration)
                 ||
                 (!this.increaseDuration && this.getDuration() == 0);
+    }
+
+    /**
+     * Checks if the workout training item is close to be complete (duration was altered enough times till almost completion)
+     * When increaseDuration flag is true it means the current value is greater or equal to the initial duration minus 3
+     * When increaseDuration flag is false it means the current value is smaller or equal to 3
+     *
+     * @return true if training is close to completion
+     */
+    public boolean isCloseToCompletion() {
+        return (this.increaseDuration && this.getDuration() >= this.initialDuration - 3)
+                ||
+                (!this.increaseDuration && this.getDuration() <= 3);
     }
 }

@@ -63,5 +63,7 @@
     <string name="pause_workout">Pause workout</string>
     <string name="previous_workout_item">Previous workout item</string>
     <string name="next_workout_item">Next workout item</string>
+    <string name="sound">Sound</string>
+    <string name="vibrate">Vibrate</string>
 
 </resources>

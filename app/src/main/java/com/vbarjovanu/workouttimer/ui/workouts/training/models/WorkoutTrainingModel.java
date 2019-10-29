@@ -23,20 +23,23 @@ public class WorkoutTrainingModel extends BaseObservable {
     private int currentIndex;
     private boolean inTraining;
     private Observable.OnPropertyChangedCallback onPropertyChangedCallback;
-    @NonNull
-    private HashMap<WorkoutTrainingItemType, Integer> workoutTrainingItemsColors;
+    private boolean locked;
+    private boolean soundOn;
+    private boolean vibrateOn;
 
     /**
      * @param workout         workout to train
      * @param includeLastRest true if to include the rest duration for the last cycle and last set
      */
-    public WorkoutTrainingModel(@NonNull Workout workout, boolean includeLastRest, @NonNull HashMap<WorkoutTrainingItemType, Integer> workoutTrainingItemsColors) {
+    public WorkoutTrainingModel(@NonNull Workout workout, boolean includeLastRest) {
         this.workout = workout;
         this.includeLastRest = includeLastRest;
         this.inTraining = false;
         this.buildWorkoutTrainingItems();
         this.currentIndex = 0;
-        this.workoutTrainingItemsColors = workoutTrainingItemsColors;
+        this.locked = false;
+        this.setSoundOn(true);
+        this.setVibrateOn(true);
     }
 
     public void close() {
@@ -51,19 +54,27 @@ public class WorkoutTrainingModel extends BaseObservable {
 
     @SuppressWarnings("WeakerAccess")
     @Bindable
-    public int getTotalDuration() {
-        return this.computeDurationFromIndex(0);
+    public int getTotalInitialDuration() {
+        return this.computeInitialDurationFromIndex(0);
     }
 
     @Bindable
     public int getTotalRemainingDuration() {
-        return this.computeDurationFromIndex(this.currentIndex);
+        return this.computeRemainingDurationFromIndex(this.currentIndex);
     }
 
-    private int computeDurationFromIndex(int index) {
+    private int computeInitialDurationFromIndex(int index) {
         int d = 0;
         for (int i = index; i < this.workoutTrainingItems.size(); i++) {
-            d += this.workoutTrainingItems.get(i).getDuration();
+            d += this.workoutTrainingItems.get(i).getInitialDuration();
+        }
+        return d;
+    }
+
+    private int computeRemainingDurationFromIndex(int index) {
+        int d = 0;
+        for (int i = index; i < this.workoutTrainingItems.size(); i++) {
+            d += this.workoutTrainingItems.get(i).getRemainingDuration();
         }
         return d;
     }
@@ -83,23 +94,43 @@ public class WorkoutTrainingModel extends BaseObservable {
         return inTraining;
     }
 
-    public int getColor(WorkoutTrainingItemModel itemModel) {
-        WorkoutTrainingItemType itemType;
-        int color;
-        itemType = itemModel.getType();
-        if (this.workoutTrainingItemsColors.containsKey(itemType) && this.workoutTrainingItemsColors.get(itemType) != null) {
-            //noinspection ConstantConditions
-            color = this.workoutTrainingItemsColors.get(itemType);
-        } else {
-            color = Color.parseColor("#ff33b5e5");
-        }
-        return color;
+    @Bindable
+    public boolean isLocked() {
+        return locked;
+    }
+
+    @Bindable
+    public boolean isSoundOn() {
+        return soundOn;
+    }
+
+    @Bindable
+    public boolean isVibrateOn() {
+        return vibrateOn;
     }
 
     @SuppressWarnings("UnusedReturnValue")
     public WorkoutTrainingModel setInTraining(boolean inTraining) {
         this.inTraining = inTraining;
         this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.inTraining);
+        return this;
+    }
+
+    public WorkoutTrainingModel setLocked(boolean locked) {
+        this.locked = locked;
+        this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.locked);
+        return this;
+    }
+
+    public WorkoutTrainingModel setSoundOn(boolean soundOn) {
+        this.soundOn = soundOn;
+        this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.soundOn);
+        return this;
+    }
+
+    public WorkoutTrainingModel setVibrateOn(boolean vibrateOn) {
+        this.vibrateOn = vibrateOn;
+        this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.vibrateOn);
         return this;
     }
 
@@ -244,7 +275,7 @@ public class WorkoutTrainingModel extends BaseObservable {
         @Override
         public void onPropertyChanged(Observable sender, int propertyId) {
             if (propertyId == com.vbarjovanu.workouttimer.BR.duration) {
-                WorkoutTrainingModel.this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.totalDuration);
+                WorkoutTrainingModel.this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.totalInitialDuration);
                 WorkoutTrainingModel.this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.totalRemainingDuration);
             }
         }

@@ -46,14 +46,7 @@ public class WorkoutTrainingTimerTest {
     }
 
     private WorkoutTrainingModel buildDefaultWorkoutTrainingModel() {
-        HashMap<WorkoutTrainingItemType, Integer> colors;
-        colors = new HashMap<>();
-        colors.put(WorkoutTrainingItemType.PREPARE, 0);
-        colors.put(WorkoutTrainingItemType.WORK, 1);
-        colors.put(WorkoutTrainingItemType.REST, 2);
-        colors.put(WorkoutTrainingItemType.SET_REST, 3);
-        colors.put(WorkoutTrainingItemType.COOL_DOWN, 4);
-        return new WorkoutTrainingModel(this.buildDefaultWorkout(), true, colors);
+        return new WorkoutTrainingModel(this.buildDefaultWorkout(), true);
     }
 
     @Test
