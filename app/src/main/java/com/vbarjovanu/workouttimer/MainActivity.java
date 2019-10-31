@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -44,18 +45,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.initViewModel();
-
         this.activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        this.initViewModel(savedInstanceState);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton floatingActionButtonNewEntity = findViewById(R.id.floating_action_button_new);
-        floatingActionButtonNewEntity.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mainActivityViewModel.newEntity();
-            }
-        });
+        floatingActionButtonNewEntity.setOnClickListener(view -> mainActivityViewModel.newEntity());
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -68,6 +63,12 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("mainActivityModel", this.mainActivityViewModel.getModel().getValue());
     }
 
     @Override
@@ -122,12 +123,16 @@ public class MainActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
-    private void initViewModel() {
+    private void initViewModel(Bundle savedInstanceState) {
         this.mainActivityViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getApplication())).get(IMainActivityViewModel.class);
+        MainActivityModel mainActivityModel = null;
+        if (savedInstanceState != null && savedInstanceState.containsKey("mainActivityModel")) {
+            mainActivityModel = (MainActivityModel) savedInstanceState.getSerializable("mainActivityModel");
+        }
         this.addActionObserver();
         this.addModelObserver();
-        //ar trebui să o facă home fragment-ul + navigarea
-        this.mainActivityViewModel.initUserProfile();
+        this.mainActivityViewModel.initUserProfile(savedInstanceState == null);//when no previous state exists, home navigation can be done
+        this.mainActivityViewModel.initModel(mainActivityModel);
     }
 
     private void removeActionObserver() {
@@ -138,12 +143,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addActionObserver() {
-        this.actionObserver = new Observer<EventContent<MainActivityActionData>>() {
-            @Override
-            public void onChanged(EventContent<MainActivityActionData> eventContent) {
-                onActionChanged(eventContent);
-            }
-        };
+        this.actionObserver = this::onActionChanged;
         this.mainActivityViewModel.getAction().observe(this, this.actionObserver);
     }
 
@@ -155,12 +155,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addModelObserver() {
-        this.modelObserver = new Observer<MainActivityModel>() {
-            @Override
-            public void onChanged(MainActivityModel mainActivityModel) {
-                onModelChanged(mainActivityModel);
-            }
-        };
+        this.modelObserver = this::onModelChanged;
         this.mainActivityViewModel.getModel().observe(this, this.modelObserver);
     }
 
@@ -181,12 +176,10 @@ public class MainActivity extends AppCompatActivity {
             switch (mainActivityAction) {
                 case GOTO_USERPROFILES:
                     eventContent.setHandled();
-                    Toast.makeText(this, "Goto user profiles", Toast.LENGTH_LONG).show();
                     navController.navigate(R.id.action_nav_home_to_nav_userprofiles);
                     break;
                 case GOTO_HOME:
                     eventContent.setHandled();
-                    Toast.makeText(this, "Goto home", Toast.LENGTH_LONG).show();
                     navController.navigate(R.id.action_global_nav_home);
                     break;
                 case EXIT:

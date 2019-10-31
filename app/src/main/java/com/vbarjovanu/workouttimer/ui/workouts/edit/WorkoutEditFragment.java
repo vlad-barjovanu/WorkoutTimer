@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -56,21 +57,50 @@ public class WorkoutEditFragment extends Fragment implements WorkoutEditFragment
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if (this.getArguments() != null && this.getArguments().containsKey("workoutId")) {
-            String workoutId = this.getArguments().getString("workoutId");
-            if (workoutId == null) {
-                this.workoutEditViewModel.newWorkout();
-            } else {
-                this.workoutEditViewModel.loadWorkout(workoutId);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (this.getArguments() != null) {
+            String action = this.getArguments().getString("action", "");
+            String workoutId = this.getArguments().getString("workoutId", null);
+            if (action.equals("GOTO_WORKOUT_EDIT") && workoutId != null) {
+                this.loadWorkout(workoutId, savedInstanceState);
+            }
+            if (action.equals("GOTO_WORKOUT_NEW")) {
+                this.newWorkout(savedInstanceState);
             }
         }
     }
 
+    private Workout getSavedWorkout(Bundle savedInstanceState) {
+        if (savedInstanceState != null && savedInstanceState.containsKey("workout")) {
+            return (Workout) savedInstanceState.getSerializable("workout");
+        }
+        return null;
+    }
+
+    private void newWorkout(Bundle savedInstanceState) {
+        if (!this.workoutEditViewModel.isInitialised()) {
+            this.workoutEditViewModel.newWorkout(this.getSavedWorkout(savedInstanceState));
+        }
+    }
+
+    private void loadWorkout(String workoutId, @Nullable Bundle savedInstanceState) {
+        if (!this.workoutEditViewModel.isInitialised()) {
+            this.workoutEditViewModel.loadWorkout(workoutId, this.getSavedWorkout(savedInstanceState));
+        }
+    }
+
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (this.workoutEditViewModel.isInitialised()) {
+            outState.putSerializable("workout", this.workoutEditViewModel.getWorkout().getValue());
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
         this.removeViewModelWorkoutObserver();
         this.removeViewModelActionObserver();
         this.removeMainActivityViewModelActionObserver();
@@ -84,12 +114,7 @@ public class WorkoutEditFragment extends Fragment implements WorkoutEditFragment
     }
 
     private void addViewModelWorkoutObserver() {
-        this.workoutObserver = new Observer<Workout>() {
-            @Override
-            public void onChanged(Workout workout) {
-                onWorkoutChanged(workout);
-            }
-        };
+        this.workoutObserver = (Observer<Workout>) this::onWorkoutChanged;
         this.workoutEditViewModel.getWorkout().observe(this, this.workoutObserver);
     }
 
@@ -101,12 +126,7 @@ public class WorkoutEditFragment extends Fragment implements WorkoutEditFragment
     }
 
     private void addViewModelActionObserver() {
-        this.actionObserver = new Observer<WorkoutEditFragmentAction>() {
-            @Override
-            public void onChanged(WorkoutEditFragmentAction workoutEditFragmentAction) {
-                onActionChanged(workoutEditFragmentAction);
-            }
-        };
+        this.actionObserver = (Observer<WorkoutEditFragmentAction>) this::onActionChanged;
         this.workoutEditViewModel.getAction().observe(this, this.actionObserver);
     }
 
@@ -118,12 +138,7 @@ public class WorkoutEditFragment extends Fragment implements WorkoutEditFragment
     }
 
     private void addMainActivityViewModelActionObserver() {
-        this.mainActivityActionObserver = new Observer<EventContent<MainActivityActionData>>() {
-            @Override
-            public void onChanged(EventContent<MainActivityActionData> eventContent) {
-                onMainActivityActionChanged(eventContent);
-            }
-        };
+        this.mainActivityActionObserver = (Observer<EventContent<MainActivityActionData>>) this::onMainActivityActionChanged;
         this.mainActivityViewModel.getAction().observe(this, this.mainActivityActionObserver);
     }
 
@@ -181,15 +196,12 @@ public class WorkoutEditFragment extends Fragment implements WorkoutEditFragment
             arguments.putInt("color", workout.getColor());
             dialog.setArguments(arguments);
             dialog.show(getFragmentManager(), "ColorsPickerDialogFragment");
-            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dlg) {
-                    if (dialog.getArguments() != null) {
-                        int color = dialog.getArguments().getInt("color");
-                        workout.setColor(color);
-                        WorkoutEditFragment.this.binding.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.workout);
-                        WorkoutEditFragment.this.binding.invalidateAll();
-                    }
+            dialog.setOnDismissListener(dlg -> {
+                if (dialog.getArguments() != null) {
+                    int color = dialog.getArguments().getInt("color");
+                    workout.setColor(color);
+                    WorkoutEditFragment.this.binding.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.workout);
+                    WorkoutEditFragment.this.binding.invalidateAll();
                 }
             });
         }

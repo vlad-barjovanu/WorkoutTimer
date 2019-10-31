@@ -10,11 +10,12 @@ import androidx.databinding.Observable;
 import com.vbarjovanu.workouttimer.BR;
 import com.vbarjovanu.workouttimer.business.models.workouts.Workout;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class WorkoutTrainingModel extends BaseObservable {
+public class WorkoutTrainingModel extends BaseObservable implements Serializable {
 
     @NonNull
     private final Workout workout;
@@ -22,7 +23,7 @@ public class WorkoutTrainingModel extends BaseObservable {
     private List<WorkoutTrainingItemModel> workoutTrainingItems;
     private int currentIndex;
     private boolean inTraining;
-    private Observable.OnPropertyChangedCallback onPropertyChangedCallback;
+    transient private Observable.OnPropertyChangedCallback onPropertyChangedCallback;
     private boolean locked;
     private boolean soundOn;
     private boolean vibrateOn;
@@ -269,6 +270,24 @@ public class WorkoutTrainingModel extends BaseObservable {
 
     private void notifyChangeCurrentWorkoutTrainingItem() {
         this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.currentWorkoutTrainingItem);
+    }
+
+    public void update(WorkoutTrainingModel savedWorkoutTrainingModel) {
+        this.workout.update(savedWorkoutTrainingModel.getWorkout());
+        this.currentIndex = savedWorkoutTrainingModel.currentIndex;
+        this.inTraining = savedWorkoutTrainingModel.inTraining;
+        this.locked = savedWorkoutTrainingModel.locked;
+        this.vibrateOn = savedWorkoutTrainingModel.vibrateOn;
+        this.soundOn = savedWorkoutTrainingModel.soundOn;
+        if (this.workoutTrainingItems != null && savedWorkoutTrainingModel.workoutTrainingItems != null && this.workoutTrainingItems.size() == savedWorkoutTrainingModel.workoutTrainingItems.size()) {
+            for (int i = 0; i < this.workoutTrainingItems.size(); i++) {
+                WorkoutTrainingItemModel item = workoutTrainingItems.get(i);
+                WorkoutTrainingItemModel savedItem = savedWorkoutTrainingModel.workoutTrainingItems.get(i);
+                if (item.getTotalIndex() == savedItem.getTotalIndex() && item.getType() == savedItem.getType()) {
+                    item.update(savedItem);
+                }
+            }
+        }
     }
 
     private class OnPropertyChangedCallback extends androidx.databinding.Observable.OnPropertyChangedCallback {

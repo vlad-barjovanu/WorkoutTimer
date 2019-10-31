@@ -9,12 +9,16 @@ import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesS
 import com.vbarjovanu.workouttimer.session.IApplicationSession;
 import com.vbarjovanu.workouttimer.ui.generic.events.Event;
 import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
+import com.vbarjovanu.workouttimer.ui.generic.viewmodels.ISynchronizable;
+
+import java.util.concurrent.CountDownLatch;
 
 public class MainActivityViewModel extends IMainActivityViewModel {
     private IUserProfilesService userProfilesService;
     private IApplicationSession applicationSession;
     private Event<EventContent<MainActivityActionData>> action;
     private MutableLiveData<MainActivityModel> model;
+    private CountDownLatch countDownLatch;
 
     public MainActivityViewModel(@NonNull IApplicationSession applicationSession, @NonNull IUserProfilesService userProfilesService) {
         super();
@@ -56,36 +60,49 @@ public class MainActivityViewModel extends IMainActivityViewModel {
         }
     }
 
-    void initUserProfile() {
+    @Override
+    void initUserProfile(boolean navigateHome) {
         UserProfile userProfile;
         UserProfilesList userProfilesList;
-        userProfile = this.loadLastUserProfile();
-        if (userProfile == null) {
-            //if there is no user profile there are 2 options
-            userProfilesList = this.userProfilesService.loadModels();
-            switch (userProfilesList.size()) {
-                case 0:
-                    //if it doesn't exist users profiles we create a default one
-                    userProfile = this.createDefaultUserProfile();
-                    if (userProfile != null) {
-                        this.setUserProfileInSession(userProfile);
-                        this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_HOME)));
-                    } else {
-                        this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.EXIT)));
-                    }
-                    break;
-                case 1:
-                    this.setUserProfileInSession(userProfilesList.get(0));
+        //noinspection ConstantConditions
+        if (!this.model.getValue().isUserProfileInitialised()) {
+            userProfile = this.loadLastUserProfile();
+            if (userProfile == null) {
+                //if there is no user profile there are 2 options
+                userProfilesList = this.userProfilesService.loadModels();
+                switch (userProfilesList.size()) {
+                    case 0:
+                        //if it doesn't exist users profiles we create a default one
+                        userProfile = this.createDefaultUserProfile();
+                        if (userProfile != null) {
+                            this.setUserProfileInSession(userProfile);
+                            if (navigateHome) {
+                                this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_HOME)));
+                            }
+                        } else {
+                            this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.EXIT)));
+                        }
+                        break;
+                    case 1:
+                        this.setUserProfileInSession(userProfilesList.get(0));
+                        if (navigateHome) {
+                            this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_HOME)));
+                        }
+                        break;
+                    default:
+                        //if it exists users profiles, we redirect the user to choose one from
+                        this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_USERPROFILES)));
+                        break;
+                }
+            } else {
+                if (navigateHome) {
                     this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_HOME)));
-                    break;
-                default:
-                    //if it exists users profiles, we redirect the user to choose one from
-                    this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_USERPROFILES)));
-                    break;
+                }
             }
-        } else {
-            this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_HOME)));
+            this.model.getValue().setUserProfileInitialised(true);
+            this.model.setValue(this.model.getValue());
         }
+        this.decreaseCountDownLatch();
     }
 
     @Override
@@ -94,16 +111,27 @@ public class MainActivityViewModel extends IMainActivityViewModel {
     }
 
     @Override
+    public void initModel(MainActivityModel mainActivityModel) {
+        MainActivityModel model = this.model.getValue();
+        if (model != null && mainActivityModel != null) {
+            model.setSaveEntityButtonVisible(mainActivityModel.isSaveEntityButtonVisible());
+            model.setNewEntityButtonVisible(mainActivityModel.isNewEntityButtonVisible());
+        }
+    }
+
+    @Override
     public void showNewEntityButton(boolean visible) {
         if (this.model != null && this.model.getValue() != null) {
-            this.model.setValue(new MainActivityModel(visible, this.model.getValue().isSaveEntityButtonVisible()));
+            this.model.getValue().setNewEntityButtonVisible(visible);
+            this.model.setValue(this.model.getValue());
         }
     }
 
     @Override
     public void showSaveEntityButton(boolean visible) {
         if (this.model != null && this.model.getValue() != null) {
-            this.model.setValue(new MainActivityModel(this.model.getValue().isNewEntityButtonVisible(), visible));
+            this.model.getValue().setSaveEntityButtonVisible(visible);
+            this.model.setValue(this.model.getValue());
         }
     }
 
@@ -126,4 +154,16 @@ public class MainActivityViewModel extends IMainActivityViewModel {
     public void cancelEntity() {
         this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.CANCEL_ENTITY_EDIT_BUTTON_CLICKED)));
     }
+
+    @Override
+    public void setCountDownLatch(CountDownLatch countDownLatch) {
+        this.countDownLatch = countDownLatch;
+    }
+
+    private void decreaseCountDownLatch() {
+        if (this.countDownLatch != null) {
+            this.countDownLatch.countDown();
+        }
+    }
+
 }

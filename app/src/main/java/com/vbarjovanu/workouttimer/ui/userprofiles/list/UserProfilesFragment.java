@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -48,36 +49,23 @@ public class UserProfilesFragment extends Fragment {
 
         this.userProfilesViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IUserProfilesViewModel.class);
         this.mainActivityViewModel = ViewModelProviders.of(this.getActivity(), CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
-        this.userProfilesViewModel.getUserProfiles().observe(this, new Observer<UserProfilesList>() {
-            @Override
-            public void onChanged(UserProfilesList userProfiles) {
-                onUserProfilesChanged(userProfiles);
-            }
-        });
-        this.userProfilesViewModel.getActionData().observe(this, new Observer<UserProfilesFragmentActionData>() {
-            @Override
-            public void onChanged(UserProfilesFragmentActionData actionData) {
-                onUserProfilesFragmentAction(actionData);
-            }
-        });
-        this.mainActivityViewModel.getAction().observe(this, new Observer<EventContent<MainActivityActionData>>() {
-            @Override
-            public void onChanged(EventContent<MainActivityActionData> eventContent) {
-                onMainActivityAction(eventContent);
-            }
-        });
+        this.userProfilesViewModel.getUserProfiles().observe(this, this::onUserProfilesChanged);
+        this.userProfilesViewModel.getActionData().observe(this, this::onUserProfilesFragmentAction);
+        this.mainActivityViewModel.getAction().observe(this, this::onMainActivityAction);
         return root;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
         this.userProfilesViewModel.loadUserProfiles();
         this.mainActivityViewModel.showNewEntityButton(true);
         this.mainActivityViewModel.showSaveEntityButton(false);
     }
 
     private void onUserProfilesFragmentAction(UserProfilesFragmentActionData actionData) {
+        Bundle args;
         Objects.requireNonNull(this.getActivity(), "Activity must not be null");
 
         NavController navController = Navigation.findNavController(this.getActivity(), R.id.nav_host_fragment);
@@ -87,8 +75,8 @@ public class UserProfilesFragment extends Fragment {
                 break;
             case GOTO_USERPROFILE_NEW:
             case GOTO_USERPROFILE_EDIT:
-                Bundle args;
-                args = new Bundle(1);
+                args = new Bundle(2);
+                args.putString("action", actionData.getAction().toString());
                 args.putString("userProfileId", actionData.getUserProfileId());
                 navController.navigate(R.id.action_nav_userprofiles_to_nav_userprofile_edit, args);
                 break;
@@ -110,14 +98,9 @@ public class UserProfilesFragment extends Fragment {
 
     private void onUserProfilesChanged(UserProfilesList userProfiles) {
         UserProfilesRecyclerViewAdapter userProfilesRecyclerViewAdapter;
-        if(this.getActivity()!=null) {
+        if (this.getActivity() != null) {
             userProfilesRecyclerViewAdapter = new UserProfilesRecyclerViewAdapter(userProfiles, CustomViewModelFactory.getInstance(this.getActivity().getApplication()).getUserProfilesImagesService());
-            userProfilesRecyclerViewAdapter.getItemAction().observe(this, new Observer<RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction>>() {
-                @Override
-                public void onChanged(RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction> itemActionData) {
-                    onUserProfilesRecyclerViewAdapterItemAction(itemActionData);
-                }
-            });
+            userProfilesRecyclerViewAdapter.getItemAction().observe(this, this::onUserProfilesRecyclerViewAdapterItemAction);
             this.recyclerView.setAdapter(userProfilesRecyclerViewAdapter);
         }
     }

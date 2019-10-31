@@ -69,12 +69,18 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
     }
 
     @Override
-    void loadWorkout(String workoutId) {
+    void loadWorkout(String workoutId, WorkoutTrainingModel savedWorkoutTrainingModel) {
         WorkoutTrainingViewModel.LoadAsyncTask asyncTask;
         String userProfileId;
+
         userProfileId = this.applicationSession.getUserProfileId();
         asyncTask = new WorkoutTrainingViewModel.LoadAsyncTask(this, userProfileId);
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, workoutId);
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, workoutId, savedWorkoutTrainingModel);
+    }
+
+    @Override
+    boolean isInitialised() {
+        return this.workoutTrainingModel.getValue() != null;
     }
 
     @Override
@@ -198,9 +204,10 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
         }
     }
 
-    static class LoadAsyncTask extends AsyncTask<String, Void, WorkoutTrainingModel> {
+    static class LoadAsyncTask extends AsyncTask<Object, Void, WorkoutTrainingModel> {
         private WorkoutTrainingViewModel viewModel;
         private final String userProfileId;
+        private boolean shouldStartTraining = true;
 
         LoadAsyncTask(WorkoutTrainingViewModel viewModel, String userProfileId) {
             this.viewModel = viewModel;
@@ -208,11 +215,12 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
         }
 
         @Override
-        protected WorkoutTrainingModel doInBackground(String... strings) {
+        protected WorkoutTrainingModel doInBackground(Object... objects) {
             boolean includeLastRest;
             WorkoutTrainingModel data = null;
             Workout workout;
-            String workoutId = strings[0];
+            String workoutId = objects[0].toString();
+            WorkoutTrainingModel savedWorkoutTrainingModel = (WorkoutTrainingModel) objects[1];
 
             Log.v("loaddata", "doInBackground");
             IWorkoutsService workoutsService = this.viewModel.workoutsService;
@@ -221,6 +229,11 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
                 //TODO proper initialisation of includeLastRest from Workout (add property in workout)
                 includeLastRest = this.viewModel.applicationSession.getWorkoutTimerPreferences().getWorkoutPreferences().getIncludeLastRest();
                 data = new WorkoutTrainingModel(workout, includeLastRest);
+                if (savedWorkoutTrainingModel != null) {
+                    this.shouldStartTraining = savedWorkoutTrainingModel.isInTraining();
+                    data.update(savedWorkoutTrainingModel);
+                    data.setInTraining(false);// in order for the timer to be able to start (if needed)
+                }
             }
             return data;
         }
@@ -230,11 +243,11 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
             Log.v("loaddata", "onPostExecute");
             if (data != null) {
                 data.addOnPropertyChangedCallback(this.viewModel.onPropertyChangedCallback);
-            }
-            if (data != null) {
                 this.viewModel.workoutTrainingModel.setValue(data);
                 this.viewModel.workoutTrainingTimer.loadWorkout(data);
-                this.viewModel.workoutTrainingTimer.start();
+                if (this.shouldStartTraining) {
+                    this.viewModel.startWorkoutTraining();
+                }
             }
             this.viewModel.decreaseCountDownLatch();
         }

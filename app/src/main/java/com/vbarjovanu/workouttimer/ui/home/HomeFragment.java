@@ -1,5 +1,6 @@
 package com.vbarjovanu.workouttimer.ui.home;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,18 +38,13 @@ public class HomeFragment extends Fragment implements IHomeFragmentClickListener
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         this.binding = FragmentHomeBinding.bind(root);
         this.binding.setClickListners(this);
-        homeViewModel.getHomeModel().observe(this, new Observer<HomeModel>() {
-            @Override
-            public void onChanged(HomeModel homeModel) {
-                HomeFragment.this.onHomeModelChanged(homeModel);
-            }
-        });
+        homeViewModel.getHomeModel().observe(this, HomeFragment.this::onHomeModelChanged);
         return root;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         this.mainActivityViewModel.showSaveEntityButton(false);
         this.mainActivityViewModel.showNewEntityButton(false);
         this.homeViewModel.loadData();

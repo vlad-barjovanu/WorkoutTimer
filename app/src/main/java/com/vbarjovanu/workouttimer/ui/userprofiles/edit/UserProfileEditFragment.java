@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,41 +49,75 @@ public class UserProfileEditFragment extends Fragment {
         this.binding = FragmentUserprofileEditBinding.bind(root);
         this.setBindingClickListeners();
         this.userProfileEditViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IUserProfileEditViewModel.class);
-        this.userProfileEditViewModel.getUserProfileModel().observe(this, new Observer<UserProfileModel>() {
-            @Override
-            public void onChanged(UserProfileModel userProfileModel) {
-                onUserProfileModelChanged(userProfileModel);
-            }
-        });
-        this.userProfileEditViewModel.getAction().observe(this, new Observer<UserProfileEditFragmentAction>() {
-            @Override
-            public void onChanged(UserProfileEditFragmentAction action) {
-                onUserProfileEditAction(action);
-            }
-        });
+        this.userProfileEditViewModel.getUserProfileModel().observe(this, this::onUserProfileModelChanged);
+        this.userProfileEditViewModel.getAction().observe(this, this::onUserProfileEditAction);
         this.mainActivityViewModel = ViewModelProviders.of(this.getActivity(), CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
-        this.mainActivityViewModel.getAction().observe(this, new Observer<EventContent<MainActivityActionData>>() {
-            @Override
-            public void onChanged(EventContent<MainActivityActionData> eventContent) {
-                onMainActivityAction(eventContent);
-            }
-        });
-
-        if (this.getArguments() != null && this.getArguments().containsKey("userProfileId")) {
-            String userProfileId = this.getArguments().getString("userProfileId");
-            if (userProfileId != null) {
-                this.userProfileEditViewModel.loadUserProfile(userProfileId);
-            } else {
-                this.userProfileEditViewModel.newUserProfile();
-            }
-        }
-        this.mainActivityViewModel.showNewEntityButton(false);
-        this.mainActivityViewModel.showSaveEntityButton(true);
+        this.mainActivityViewModel.getAction().observe(this, this::onMainActivityAction);
 
         return root;
     }
 
-    private void setBindingClickListeners(){
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (this.getArguments() != null) {
+
+            String action = this.getArguments().getString("action", "");
+            String userProfileId = this.getArguments().getString("userProfileId", null);
+
+            if (action.equals("GOTO_USERPROFILE_EDIT") && userProfileId != null) {
+                this.loadUserProfile(userProfileId, savedInstanceState);
+            }
+            if (action.equals("GOTO_USERPROFILE_NEW")) {
+                this.newUserProfile(savedInstanceState);
+            }
+        }
+        this.mainActivityViewModel.showNewEntityButton(false);
+        this.mainActivityViewModel.showSaveEntityButton(true);
+    }
+
+    private void newUserProfile(Bundle savedInstanceState) {
+        UserProfile savedUserProfile = null;
+        if (!this.userProfileEditViewModel.isInitialised()) {
+            if (savedInstanceState != null && savedInstanceState.containsKey("userProfile")) {
+                savedUserProfile = (UserProfile) savedInstanceState.getSerializable("userProfile");
+            }
+            this.userProfileEditViewModel.newUserProfile(savedUserProfile);
+        }
+    }
+
+    private void loadUserProfile(String userProfileId, @Nullable Bundle savedInstanceState) {
+        UserProfile savedUserProfile = null;
+        if (!this.userProfileEditViewModel.isInitialised()) {
+            if (savedInstanceState != null && savedInstanceState.containsKey("userProfile")) {
+                savedUserProfile = (UserProfile) savedInstanceState.getSerializable("userProfile");
+            }
+            this.userProfileEditViewModel.loadUserProfile(userProfileId, savedUserProfile);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (this.userProfileEditViewModel.isInitialised()) {
+            //noinspection ConstantConditions
+            outState.putSerializable("userProfile", this.userProfileEditViewModel.getUserProfileModel().getValue().getUserProfile());
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (this.getActivity() != null && !this.getActivity().isChangingConfigurations()) {
+            hideKeyboard();
+            if (this.userProfileEditViewModel != null && this.userProfileEditViewModel.isInitialised()) {
+                this.userProfileEditViewModel.cancelUserProfileEdit();
+            }
+        }
+    }
+
+    private void setBindingClickListeners() {
         this.binding.setClickListners(new UserProfileEditFragmentClickListners() {
             @Override
             public void onUserImageClick(View view) {
@@ -159,7 +194,7 @@ public class UserProfileEditFragment extends Fragment {
     }
 
     private void onUserImageClick(View view) {
-            this.dispatchTakePictureIntent();
+        this.dispatchTakePictureIntent();
     }
 
     private void onDeleteUserImageClick(View view) {

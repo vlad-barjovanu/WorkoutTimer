@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -51,7 +52,6 @@ public class WorkoutsFragment extends Fragment {
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        String profileId;
         View root = null;
 
         if (this.getActivity() != null) {
@@ -70,11 +70,17 @@ public class WorkoutsFragment extends Fragment {
             this.addWorkoutsViewModelWorkoutsObserver();
             this.addWorkoutsViewModelActionDataObserver();
             this.addMainActivityActionObserver();
-
-            profileId = ApplicationSessionFactory.getApplicationSession(this.getContext()).getUserProfileId();
-            workoutsViewModel.loadWorkouts(profileId);
         }
         return root;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        String profileId;
+        super.onActivityCreated(savedInstanceState);
+
+        profileId = ApplicationSessionFactory.getApplicationSession(this.getContext()).getUserProfileId();
+        workoutsViewModel.loadWorkouts(profileId);
     }
 
     private void deleteWorkoutClicked(final String workoutId) {
@@ -220,7 +226,8 @@ public class WorkoutsFragment extends Fragment {
                 break;
             case GOTO_WORKOUT_EDIT:
             case GOTO_WORKOUT_NEW:
-                args = new Bundle(2);
+                args = new Bundle(3);
+                args.putString("action", workoutsFragmentActionData.getAction().toString());
                 args.putString("profileId", workoutsFragmentActionData.getProfileId());
                 args.putString("workoutId", workoutsFragmentActionData.getWorkoutId());
                 navController.navigate(R.id.action_nav_workouts_to_nav_workout_edit, args);

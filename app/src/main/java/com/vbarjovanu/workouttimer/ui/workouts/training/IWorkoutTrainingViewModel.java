@@ -18,7 +18,9 @@ public abstract class IWorkoutTrainingViewModel extends ViewModel implements ISy
 
     abstract IWorkoutTrainingItemColorProvider getWorkoutTrainingItemColorProvider();
 
-    abstract void loadWorkout(String workoutId);
+    abstract void loadWorkout(String workoutId, WorkoutTrainingModel savedWorkoutTrainingModel);
+
+    abstract boolean isInitialised();
 
     abstract void startWorkoutTraining();
 

@@ -7,7 +7,9 @@ import androidx.databinding.InverseBindingAdapter;
 
 import com.vbarjovanu.workouttimer.business.models.generic.IModel;
 
-public class Workout implements IModel<Workout> {
+import java.io.Serializable;
+
+public class Workout implements IModel<Workout>, Serializable {
     private String id;
     private String name;
     private String description;

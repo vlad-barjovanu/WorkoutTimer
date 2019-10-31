@@ -6,8 +6,7 @@ import com.vbarjovanu.workouttimer.ui.generic.viewmodels.ISynchronizable;
 
 import java.util.concurrent.CountDownLatch;
 
-public class Event<T extends EventContent> extends MutableLiveData<T> implements ISynchronizable {
-    private CountDownLatch countDownLatch;
+public class Event<T extends EventContent> extends MutableLiveData<T>{
 
     public Event() {
     }
@@ -19,17 +18,6 @@ public class Event<T extends EventContent> extends MutableLiveData<T> implements
     @Override
     public void setValue(T value) {
         super.setValue(value);
-        this.decreaseCountDownLatch();
     }
 
-    @Override
-    public void setCountDownLatch(CountDownLatch countDownLatch) {
-        this.countDownLatch = countDownLatch;
-    }
-
-    private void decreaseCountDownLatch() {
-        if (this.countDownLatch != null) {
-            this.countDownLatch.countDown();
-        }
-    }
 }

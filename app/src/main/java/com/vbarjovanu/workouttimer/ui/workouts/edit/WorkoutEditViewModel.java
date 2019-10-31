@@ -31,10 +31,13 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
     }
 
     @Override
-    void newWorkout() {
+    void newWorkout(Workout savedWorkout) {
         Workout workout;
         try {
             workout = this.workoutsService.createModel();
+            if (savedWorkout != null) {
+                workout.update(savedWorkout);
+            }
             this.workoutLiveData.setValue(workout);
         } catch (Exception e) {
             e.printStackTrace();
@@ -42,12 +45,12 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
     }
 
     @Override
-    void loadWorkout(String workoutId) {
+    void loadWorkout(String workoutId, Workout savedWorkout) {
         LoadAsyncTask asyncTask;
         String userProfileId;
         userProfileId = this.applicationSession.getUserProfileId();
         asyncTask = new LoadAsyncTask(this, userProfileId);
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, workoutId);
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, workoutId, savedWorkout);
     }
 
     @Override
@@ -87,6 +90,11 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
     }
 
     @Override
+    boolean isInitialised() {
+        return this.workoutLiveData.getValue() != null;
+    }
+
+    @Override
     public void setCountDownLatch(CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }
@@ -97,7 +105,7 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
         }
     }
 
-    static class LoadAsyncTask extends AsyncTask<String, Void, Workout> {
+    static class LoadAsyncTask extends AsyncTask<Object, Void, Workout> {
         private WorkoutEditViewModel workoutEditViewModel;
         private final String userProfileId;
 
@@ -107,13 +115,17 @@ public class WorkoutEditViewModel extends IWorkoutEditViewModel {
         }
 
         @Override
-        protected Workout doInBackground(String... strings) {
+        protected Workout doInBackground(Object... objects) {
             Workout data;
-            String workoutId = strings[0];
+            String workoutId = objects[0].toString();
+            Workout savedWorkout = (Workout) objects[1];
 
             Log.v("loaddata", "doInBackground");
             IWorkoutsService workoutsService = this.workoutEditViewModel.workoutsService;
             data = workoutsService.loadModel(this.userProfileId, workoutId);
+            if (data != null && savedWorkout != null) {
+                data.update(savedWorkout);
+            }
             return data;
         }
 

@@ -4,9 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WorkoutTrainingItemModel extends BaseObservable {
+public class WorkoutTrainingItemModel extends BaseObservable implements Serializable {
     @NonNull
     private final WorkoutTrainingItemType type;
     private final boolean increaseDuration;
@@ -185,5 +186,9 @@ public class WorkoutTrainingItemModel extends BaseObservable {
         return (this.increaseDuration && this.getDuration() >= this.initialDuration - 3)
                 ||
                 (!this.increaseDuration && this.getDuration() <= 3);
+    }
+
+    public void update(WorkoutTrainingItemModel savedItem) {
+        this.duration = savedItem.duration;
     }
 }

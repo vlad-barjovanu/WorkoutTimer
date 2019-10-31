@@ -15,9 +15,9 @@ public abstract class IWorkoutEditViewModel extends ViewModel implements ISynchr
         super();
     }
 
-    abstract void newWorkout();
+    abstract void newWorkout(Workout savedWorkout);
 
-    abstract void loadWorkout(String workoutId);
+    abstract void loadWorkout(String workoutId, Workout savedWorkout);
 
     abstract LiveData<Workout> getWorkout();
 
@@ -28,4 +28,6 @@ public abstract class IWorkoutEditViewModel extends ViewModel implements ISynchr
     abstract SingleLiveEvent<WorkoutEditFragmentAction> getAction();
 
     abstract int[] getWorkoutPossibleColors();
+
+    abstract boolean isInitialised();
 }

@@ -2,7 +2,9 @@ package com.vbarjovanu.workouttimer.business.models.userprofiles;
 
 import com.vbarjovanu.workouttimer.business.models.generic.IModel;
 
-public class UserProfile implements IModel<UserProfile> {
+import java.io.Serializable;
+
+public class UserProfile implements IModel<UserProfile>, Serializable {
     private String id;
     private String name;
     private String description;

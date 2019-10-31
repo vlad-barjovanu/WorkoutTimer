@@ -65,7 +65,7 @@ public class MainActivityViewModelTest {
         this.observer = mock(Observer.class);
         mainActivityViewModel.getAction().observeForever(this.observer);
         this.countDownLatch = new CountDownLatch(1);
-        mainActivityViewModel.getAction().setCountDownLatch(countDownLatch);
+        mainActivityViewModel.setCountDownLatch(countDownLatch);
     }
 
     @SuppressWarnings("unchecked")
@@ -81,7 +81,7 @@ public class MainActivityViewModelTest {
         Mockito.when(this.userProfilesService.loadModels()).thenReturn(userProfilesList);
         Mockito.when(this.userProfilesService.createDefaultModel()).thenReturn(userProfileDefault);
         Mockito.when(this.applicationSession.getUserProfileId()).thenReturn(null);
-        mainActivityViewModel.initUserProfile();
+        mainActivityViewModel.initUserProfile(true);
         this.countDownLatch.await();
         ArgumentCaptor<EventContent<MainActivityActionData>> captor = ArgumentCaptor.forClass(EventContent.class);
         verify(this.observer, Mockito.times(1)).onChanged(captor.capture());
@@ -98,6 +98,26 @@ public class MainActivityViewModelTest {
 
     @SuppressWarnings("unchecked")
     @Test
+    public void testInitUserProfileNoUserProfileAndNoneAvailableButWithoutNavigation() throws InterruptedException, IllegalAccessException, InstantiationException, InvocationTargetException {
+        /*
+         * When no user profile is selected and no user profiles are available,
+         * a default user profile will be created and selected
+         */
+        UserProfilesList userProfilesList = new UserProfilesList();
+        UserProfile userProfileDefault = new UserProfile("123-default");
+        userProfileDefault.setName("Default");
+        Mockito.when(this.userProfilesService.loadModels()).thenReturn(userProfilesList);
+        Mockito.when(this.userProfilesService.createDefaultModel()).thenReturn(userProfileDefault);
+        Mockito.when(this.applicationSession.getUserProfileId()).thenReturn(null);
+        mainActivityViewModel.initUserProfile(false);
+        this.countDownLatch.await();
+        ArgumentCaptor<EventContent<MainActivityActionData>> captor = ArgumentCaptor.forClass(EventContent.class);
+        verify(this.observer, Mockito.times(0)).onChanged(captor.capture());
+        verify(this.applicationSession, times(1)).setUserProfileId("123-default");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
     public void testInitUserProfileInvalidUserProfileSelected() throws InterruptedException, IllegalAccessException, InstantiationException, InvocationTargetException {
         /*
          * When no user profiles are available and a non-valid user profile ID is selected,
@@ -109,7 +129,7 @@ public class MainActivityViewModelTest {
         Mockito.when(this.userProfilesService.loadModels()).thenReturn(userProfilesList);
         Mockito.when(this.userProfilesService.createDefaultModel()).thenReturn(userProfileDefault);
         Mockito.when(this.applicationSession.getUserProfileId()).thenReturn("123");
-        mainActivityViewModel.initUserProfile();
+        mainActivityViewModel.initUserProfile(true);
         this.countDownLatch.await();
         ArgumentCaptor<EventContent<MainActivityActionData>> captor = ArgumentCaptor.forClass(EventContent.class);
         verify(this.observer, Mockito.times(1)).onChanged(captor.capture());
@@ -120,6 +140,27 @@ public class MainActivityViewModelTest {
         MainActivityAction mainActivityAction = mainActivityActionData.getAction();
         Assert.assertNotNull(mainActivityAction);
         Assert.assertEquals(MainActivityAction.GOTO_HOME, mainActivityAction);
+        //the newly created default profile must be set in app session
+        verify(this.applicationSession, times(1)).setUserProfileId("123-default");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testInitUserProfileInvalidUserProfileSelectedButWithoutNavigation() throws InterruptedException, IllegalAccessException, InstantiationException, InvocationTargetException {
+        /*
+         * When no user profiles are available and a non-valid user profile ID is selected,
+         * a default user profile will be created and selected
+         */
+        UserProfilesList userProfilesList = new UserProfilesList();
+        UserProfile userProfileDefault = new UserProfile("123-default");
+        userProfileDefault.setName("Default");
+        Mockito.when(this.userProfilesService.loadModels()).thenReturn(userProfilesList);
+        Mockito.when(this.userProfilesService.createDefaultModel()).thenReturn(userProfileDefault);
+        Mockito.when(this.applicationSession.getUserProfileId()).thenReturn("123");
+        mainActivityViewModel.initUserProfile(false);
+        this.countDownLatch.await();
+        ArgumentCaptor<EventContent<MainActivityActionData>> captor = ArgumentCaptor.forClass(EventContent.class);
+        verify(this.observer, Mockito.times(0)).onChanged(captor.capture());
         //the newly created default profile must be set in app session
         verify(this.applicationSession, times(1)).setUserProfileId("123-default");
     }
@@ -138,7 +179,7 @@ public class MainActivityViewModelTest {
         Mockito.when(this.userProfilesService.loadModel("abc")).thenReturn(userProfilesList.find("abc"));
         Mockito.when(this.applicationSession.getUserProfileId()).thenReturn("abc");
 
-        mainActivityViewModel.initUserProfile();
+        mainActivityViewModel.initUserProfile(true);
         this.countDownLatch.await();
         ArgumentCaptor<EventContent<MainActivityActionData>> captor = ArgumentCaptor.forClass(EventContent.class);
         verify(this.observer, Mockito.times(1)).onChanged(captor.capture());
@@ -167,7 +208,7 @@ public class MainActivityViewModelTest {
         Mockito.when(this.userProfilesService.loadModel("abc")).thenReturn(userProfilesList.find("abc"));
         Mockito.when(this.applicationSession.getUserProfileId()).thenReturn(null);
 
-        mainActivityViewModel.initUserProfile();
+        mainActivityViewModel.initUserProfile(true);
         this.countDownLatch.await();
         ArgumentCaptor<EventContent<MainActivityActionData>> captor = ArgumentCaptor.forClass(EventContent.class);
         verify(this.observer, Mockito.times(1)).onChanged(captor.capture());

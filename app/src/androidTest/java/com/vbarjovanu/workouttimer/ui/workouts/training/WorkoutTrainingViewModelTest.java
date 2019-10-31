@@ -89,7 +89,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: the default values are: vibrate and sound on, in training and locked off
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         assertNotNull(this.viewModel.getWorkoutTrainingModel());
         assertNotNull(this.viewModel.getWorkoutTrainingModel().getValue());
@@ -117,7 +117,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingModel is changed, is not null and it contains the desired workout
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         ArgumentCaptor<WorkoutTrainingModel> modelCaptor = ArgumentCaptor.forClass(WorkoutTrainingModel.class);
         verify(this.workoutTrainingModelObserver, times(1)).onChanged(modelCaptor.capture());
@@ -135,7 +135,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingModel is not changed and remains null
          */
         String workoutId = "1234";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         ArgumentCaptor<WorkoutTrainingModel> modelCaptor = ArgumentCaptor.forClass(WorkoutTrainingModel.class);
         verify(this.workoutTrainingModelObserver, times(0)).onChanged(modelCaptor.capture());
@@ -161,7 +161,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingModel.workoutTrainingTimer.start() is called twice (one during load and once by our direct call)
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         this.viewModel.getWorkoutTrainingModel().getValue().setLocked(false);
         this.viewModel.startWorkoutTraining();
@@ -176,7 +176,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingModel.workoutTrainingTimer.start() is called once (only once during load)
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         this.viewModel.getWorkoutTrainingModel().getValue().setLocked(true);
         this.viewModel.startWorkoutTraining();
@@ -202,7 +202,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingModel.workoutTrainingTimer.pause() is called once
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         this.viewModel.getWorkoutTrainingModel().getValue().setLocked(false);
         this.viewModel.pauseWorkoutTraining();
@@ -217,7 +217,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingModel.workoutTrainingTimer.pause() is not called
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         this.viewModel.getWorkoutTrainingModel().getValue().setLocked(true);
         this.viewModel.pauseWorkoutTraining();
@@ -243,7 +243,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingModel.workoutTrainingTimer.stop() is called once
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         this.viewModel.stopWorkoutTraining();
         verify(this.workoutTrainingTimer, times(1)).stop();
@@ -278,7 +278,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingTimer.start() and workoutTrainingTimer.stop() are called each one time
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         assertEquals(WorkoutTrainingItemType.PREPARE, this.viewModel.getWorkoutTrainingModel().getValue().getCurrentWorkoutTrainingItem().getType());
         this.viewModel.getWorkoutTrainingModel().getValue().setLocked(false);
@@ -310,7 +310,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingTimer.start() and workoutTrainingTimer.stop() are not called after load
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         assertEquals(WorkoutTrainingItemType.PREPARE, this.viewModel.getWorkoutTrainingModel().getValue().getCurrentWorkoutTrainingItem().getType());
         this.viewModel.getWorkoutTrainingModel().getValue().setLocked(true);
@@ -355,7 +355,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingTimer.start() and workoutTrainingTimer.stop() are called each one time
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         assertEquals(WorkoutTrainingItemType.PREPARE, this.viewModel.getWorkoutTrainingModel().getValue().getCurrentWorkoutTrainingItem().getType());
         this.viewModel.getWorkoutTrainingModel().getValue().setLocked(false);
@@ -387,7 +387,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: workoutTrainingTimer.start() and workoutTrainingTimer.stop() are not called after load
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         this.viewModel.getWorkoutTrainingModel().getValue().setLocked(true);
         this.viewModel.getWorkoutTrainingModel().getValue().setInTraining(false);
@@ -422,7 +422,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: while in training, lock can be changed
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         assertFalse(this.viewModel.getWorkoutTrainingModel().getValue().isInTraining());
         assertFalse(this.viewModel.getWorkoutTrainingModel().getValue().isLocked());
@@ -454,7 +454,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: while is not locked, sound can be changed
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         assertFalse(this.viewModel.getWorkoutTrainingModel().getValue().isLocked());
         assertTrue(this.viewModel.getWorkoutTrainingModel().getValue().isSoundOn());
@@ -483,7 +483,7 @@ public class WorkoutTrainingViewModelTest {
          * expects: while is not locked, vibrate can be changed
          */
         String workoutId = "123";
-        this.viewModel.loadWorkout(workoutId);
+        this.viewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         assertFalse(this.viewModel.getWorkoutTrainingModel().getValue().isLocked());
         assertTrue(this.viewModel.getWorkoutTrainingModel().getValue().isVibrateOn());

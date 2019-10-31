@@ -19,23 +19,36 @@ public abstract class IUserProfileEditViewModel extends ViewModel implements ISy
 
     /**
      * Loads the user profile to be edited
+     *
      * @param userProfileId ID of the user profile to load for editing
+     * @param savedStateUserProfile previous saved state of user profile. may be null
      */
-    abstract void loadUserProfile(String userProfileId);
+    abstract void loadUserProfile(String userProfileId, UserProfile savedStateUserProfile);
 
     /**
      * Creates a new user profile to be edited
+     *
+     * @param savedStateUserProfile previous saved state of user profile. may be null
      */
-    abstract void newUserProfile();
+    abstract void newUserProfile(UserProfile savedStateUserProfile);
+
+    /**
+     * Returns true if the view model has been initialised: one of the methods loadUserProfile or newUserProfile was called to initialise the model
+     *
+     * @return true if initialisation was done, false otherwise
+     */
+    abstract boolean isInitialised();
 
     /**
      * Returns the user profile to edit
+     *
      * @return user profile live data
      */
     abstract LiveData<UserProfileModel> getUserProfileModel();
 
     /**
      * Saves the user profile changes
+     *
      * @param userProfileModelToSave user profile to be saved
      */
     abstract void saveUserProfile(UserProfileModel userProfileModelToSave);
@@ -47,6 +60,7 @@ public abstract class IUserProfileEditViewModel extends ViewModel implements ISy
 
     /**
      * returns the action live data of the user profile edit
+     *
      * @return the action
      */
     abstract SingleLiveEvent<UserProfileEditFragmentAction> getAction();

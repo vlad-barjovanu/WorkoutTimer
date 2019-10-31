@@ -102,7 +102,7 @@ public class WorkoutEditViewModelTest {
         ArgumentCaptor<WorkoutEditFragmentAction> actionCaptor = ArgumentCaptor.forClass(WorkoutEditFragmentAction.class);
         Workout newWorkout = new Workout("123-new");
         Mockito.when(this.workoutsService.createModel()).thenReturn(newWorkout);
-        this.workoutEditViewModel.newWorkout();
+        this.workoutEditViewModel.newWorkout(null);
         //workout change
         Mockito.verify(this.workoutObserver, Mockito.times(1)).onChanged(captor.capture());
         Workout workout = captor.getValue();
@@ -126,7 +126,7 @@ public class WorkoutEditViewModelTest {
 
         Workout newWorkout = new Workout(workoutId);
         Mockito.when(this.workoutsService.loadModel(userProfileId, workoutId)).thenReturn(newWorkout);
-        this.workoutEditViewModel.loadWorkout(workoutId);
+        this.workoutEditViewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         //workout change
         Mockito.verify(this.workoutObserver, Mockito.times(1)).onChanged(captor.capture());
@@ -150,7 +150,7 @@ public class WorkoutEditViewModelTest {
         ArgumentCaptor<WorkoutEditFragmentAction> actionCaptor = ArgumentCaptor.forClass(WorkoutEditFragmentAction.class);
 
         Mockito.when(this.workoutsService.loadModel(userProfileId, workoutId)).thenReturn(null);
-        this.workoutEditViewModel.loadWorkout(workoutId);
+        this.workoutEditViewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         //workout change
         Mockito.verify(this.workoutObserver, Mockito.times(1)).onChanged(captor.capture());
@@ -206,7 +206,7 @@ public class WorkoutEditViewModelTest {
         ArgumentCaptor<WorkoutEditFragmentAction> captorAction = ArgumentCaptor.forClass(WorkoutEditFragmentAction.class);
         Workout newWorkout = new Workout(workoutId);
         Mockito.when(this.workoutsService.loadModel(userProfileId, workoutId)).thenReturn(newWorkout);
-        this.workoutEditViewModel.loadWorkout(workoutId);
+        this.workoutEditViewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         Workout workoutToSave = new Workout(workoutId);
         workoutToSave.setName("name").setDescription("description");
@@ -264,7 +264,7 @@ public class WorkoutEditViewModelTest {
         //load workout
         Workout newWorkout = new Workout(workoutId);
         Mockito.when(this.workoutsService.loadModel(userProfileId, workoutId)).thenReturn(newWorkout);
-        this.workoutEditViewModel.loadWorkout(workoutId);
+        this.workoutEditViewModel.loadWorkout(workoutId, null);
         this.countDownLatch.await();
         //cancel workout
         this.setupCountDownLatch();

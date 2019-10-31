@@ -1,6 +1,8 @@
 package com.vbarjovanu.workouttimer.ui.workouts.training.models;
 
-public enum WorkoutTrainingItemType {
+import java.io.Serializable;
+
+public enum WorkoutTrainingItemType implements Serializable {
     PREPARE,
     WORK,
     REST,

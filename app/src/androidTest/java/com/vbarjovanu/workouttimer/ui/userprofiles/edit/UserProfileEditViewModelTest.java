@@ -125,7 +125,7 @@ public class UserProfileEditViewModelTest {
         String userProfileId = "abc";
         ArgumentCaptor<UserProfileModel> userProfileModelCaptor = ArgumentCaptor.forClass(UserProfileModel.class);
         ArgumentCaptor<UserProfileEditFragmentAction> actionCaptor = ArgumentCaptor.forClass(UserProfileEditFragmentAction.class);
-        this.userProfileEditViewModel.loadUserProfile(userProfileId);
+        this.userProfileEditViewModel.loadUserProfile(userProfileId, null);
         countDownLatch.await();
         //check that userProfileModel has changed and returns the loaded userProfile
         Mockito.verify(this.userProfileModelObserver, Mockito.times(1)).onChanged(userProfileModelCaptor.capture());
@@ -150,7 +150,7 @@ public class UserProfileEditViewModelTest {
         ArgumentCaptor<UserProfileEditFragmentAction> actionCaptor = ArgumentCaptor.forClass(UserProfileEditFragmentAction.class);
 
         Assert.assertNull(this.userProfileEditViewModel.getUserProfileModel().getValue());
-        this.userProfileEditViewModel.loadUserProfile(userProfileId);
+        this.userProfileEditViewModel.loadUserProfile(userProfileId, null);
         countDownLatch.await();
         //check that userProfileModel has changed and returns a null userProfile
         Mockito.verify(this.userProfileModelObserver, Mockito.times(0)).onChanged(userProfileModelCaptor.capture());
@@ -168,7 +168,7 @@ public class UserProfileEditViewModelTest {
          */
         ArgumentCaptor<UserProfileModel> userProfileModelCaptor = ArgumentCaptor.forClass(UserProfileModel.class);
         ArgumentCaptor<UserProfileEditFragmentAction> actionCaptor = ArgumentCaptor.forClass(UserProfileEditFragmentAction.class);
-        this.userProfileEditViewModel.newUserProfile();
+        this.userProfileEditViewModel.newUserProfile(null);
         countDownLatch.await();
         //check that userProfileModel is changed and has the newly created userProfile
         Mockito.verify(this.userProfileModelObserver, Mockito.times(1)).onChanged(userProfileModelCaptor.capture());
@@ -215,7 +215,7 @@ public class UserProfileEditViewModelTest {
         ArgumentCaptor<UserProfileEditFragmentAction> actionCaptor = ArgumentCaptor.forClass(UserProfileEditFragmentAction.class);
 
         //load userProfile
-        this.userProfileEditViewModel.loadUserProfile(userProfileId);
+        this.userProfileEditViewModel.loadUserProfile(userProfileId, null);
         countDownLatch.await();
         //modify userProfile
         UserProfileModel userProfileModel = this.userProfileEditViewModel.getUserProfileModel().getValue();
@@ -294,7 +294,7 @@ public class UserProfileEditViewModelTest {
         ArgumentCaptor<UserProfileEditFragmentAction> actionCaptor = ArgumentCaptor.forClass(UserProfileEditFragmentAction.class);
 
         //load userProfile
-        this.userProfileEditViewModel.loadUserProfile(userProfileId);
+        this.userProfileEditViewModel.loadUserProfile(userProfileId, null);
         countDownLatch.await();
         UserProfileModel userProfileModel = this.userProfileEditViewModel.getUserProfileModel().getValue();
         Assert.assertNotNull(userProfileModel);
@@ -350,7 +350,7 @@ public class UserProfileEditViewModelTest {
         ArgumentCaptor<UserProfileEditFragmentAction> actionCaptor = ArgumentCaptor.forClass(UserProfileEditFragmentAction.class);
 
         //user with ID "abc" has a image file path, so a userImage will be returned by the service
-        this.userProfileEditViewModel.loadUserProfile(userProfileId);
+        this.userProfileEditViewModel.loadUserProfile(userProfileId, null);
         countDownLatch.await();
         Assert.assertNotNull(this.userProfileEditViewModel.getUserProfileModel().getValue());
         userImage = this.userProfileEditViewModel.getUserProfileModel().getValue().getUserImage();

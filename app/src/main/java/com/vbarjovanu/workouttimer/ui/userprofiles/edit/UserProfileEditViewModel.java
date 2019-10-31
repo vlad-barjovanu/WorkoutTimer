@@ -32,23 +32,31 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
     }
 
     @Override
-    void loadUserProfile(String userProfileId) {
+    void loadUserProfile(String userProfileId, UserProfile savedStateUserProfile) {
         LoadAsyncTask asyncTask;
 
         asyncTask = new LoadAsyncTask(this);
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, userProfileId);
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, userProfileId, savedStateUserProfile);
     }
 
     @Override
-    void newUserProfile() {
+    void newUserProfile(UserProfile savedStateUserProfile) {
         UserProfile userProfile;
         try {
             userProfile = this.userProfilesService.createModel();
+            if (userProfile != null && savedStateUserProfile != null) {
+                userProfile.update(savedStateUserProfile);
+            }
             this.decreaseCountDownLatch();
             this.userProfileModel.setValue(new UserProfileModel(userProfile, this.userProfilesImagesService.getUserImage(userProfile)));
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    boolean isInitialised() {
+        return this.userProfileModel.getValue() != null;
     }
 
     @Override
@@ -102,7 +110,7 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         }
     }
 
-    static class LoadAsyncTask extends AsyncTask<String, Void, UserProfile> {
+    static class LoadAsyncTask extends AsyncTask<Object, Void, UserProfile> {
         UserProfileEditViewModel userProfileEditViewModel;
 
         LoadAsyncTask(UserProfileEditViewModel userProfileEditViewModel) {
@@ -110,12 +118,15 @@ public class UserProfileEditViewModel extends IUserProfileEditViewModel {
         }
 
         @Override
-        protected UserProfile doInBackground(String... strings) {
+        protected UserProfile doInBackground(Object... objects) {
             UserProfile data;
-            String userProfileId = strings[0];
-
+            String userProfileId = objects[0].toString();
+            UserProfile savedStateUserProfile = (UserProfile) objects[1];
             Log.v("loaddata", "doInBackground");
             data = this.userProfileEditViewModel.userProfilesService.loadModel(userProfileId);
+            if (data != null && savedStateUserProfile != null) {
+                data.update(savedStateUserProfile);
+            }
             return data;
         }
 

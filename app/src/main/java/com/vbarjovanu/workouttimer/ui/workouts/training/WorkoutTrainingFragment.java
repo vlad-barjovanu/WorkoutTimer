@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -48,26 +49,48 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             this.binding = FragmentWorkoutTrainingBinding.bind(root);
             this.binding.setClickListners(this);
             this.binding.setWorkoutTrainingItemColorProvider(this.viewModel.getWorkoutTrainingItemColorProvider());
-
-            this.loadWorkout();
         }
         return root;
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        this.viewModel.stopWorkoutTraining();
-        this.viewModel.close();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        String workoutId = null;
+        if (this.getArguments() != null) {
+            workoutId = this.getArguments().getString("workoutId", null);
+        }
+        this.loadWorkout(workoutId, savedInstanceState);
     }
 
-    private void loadWorkout() {
-        if (this.getArguments() != null && this.getArguments().containsKey("workoutId")) {
-            String workoutId = this.getArguments().getString("workoutId");
-            if (workoutId != null) {
-                this.viewModel.loadWorkout(workoutId);
-            }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (this.getActivity() != null && !this.getActivity().isChangingConfigurations()) {
+            //if it's changing configurations don't stop the training
+            this.viewModel.stopWorkoutTraining();
+            this.viewModel.close();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (this.viewModel.isInitialised()) {
+            outState.putSerializable("workoutTrainingModel", this.viewModel.getWorkoutTrainingModel().getValue());
+        }
+    }
+
+    private WorkoutTrainingModel getSavedWorkoutTrainingModel(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState != null && savedInstanceState.containsKey("workoutTrainingModel")) {
+            return (WorkoutTrainingModel) savedInstanceState.getSerializable("workoutTrainingModel");
+        }
+        return null;
+    }
+
+    private void loadWorkout(String workoutId, @Nullable Bundle savedInstanceState) {
+        if (workoutId != null) {
+            this.viewModel.loadWorkout(workoutId, this.getSavedWorkoutTrainingModel(savedInstanceState));
         }
     }
 
@@ -93,6 +116,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
 
     private void onWorkoutChanged(WorkoutTrainingModel workoutTrainingModel) {
         this.binding.setWorkoutTrainingModel(workoutTrainingModel);
+        //when it's restored from saved instance, .inTraining property is true so that's why the timer won't start
     }
 
     @SuppressWarnings("ConstantConditions")
