@@ -136,7 +136,7 @@ public class WorkoutsFragment extends Fragment {
         this.removeWorkoutsAdapter(false);
         this.workoutsAdapter = new WorkoutsRecyclerViewAdapter(workouts);
         this.addWorkoutsAdapterItemActionObserver();
-        this.recyclerView.swapAdapter(workoutsAdapter, false);
+        this.recyclerView.swapAdapter(this.workoutsAdapter, false);
     }
 
     private void removeWorkoutsViewModelWorkoutsObserver() {

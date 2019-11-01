@@ -4,14 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 
+import com.vbarjovanu.workouttimer.business.models.generic.IModel;
+
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WorkoutTrainingItemModel extends BaseObservable implements Serializable {
+public class WorkoutTrainingItemModel extends BaseObservable implements Serializable, IModel<WorkoutTrainingItemModel> {
     @NonNull
     private final WorkoutTrainingItemType type;
     private final boolean increaseDuration;
-    private final int totalIndex;
+    private int totalIndex;
     private final int cycleIndex;
     private final int setIndex;
     private AtomicInteger duration;
@@ -90,7 +92,6 @@ public class WorkoutTrainingItemModel extends BaseObservable implements Serializ
         return description;
     }
 
-    @SuppressWarnings("WeakerAccess")
     @Bindable
     public int getTotalIndex() {
         return totalIndex;
@@ -188,7 +189,18 @@ public class WorkoutTrainingItemModel extends BaseObservable implements Serializ
                 (!this.increaseDuration && this.getDuration() <= 3);
     }
 
+    @Override
     public void update(WorkoutTrainingItemModel savedItem) {
         this.duration = savedItem.duration;
+    }
+
+    @Override
+    public String getPrimaryKey() {
+        return Integer.toString(this.totalIndex);
+    }
+
+    @Override
+    public void setPrimaryKey(String primaryKey) {
+        this.totalIndex = Integer.parseInt(primaryKey);
     }
 }

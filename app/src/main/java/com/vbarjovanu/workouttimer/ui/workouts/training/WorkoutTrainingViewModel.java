@@ -142,6 +142,24 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
     }
 
     @Override
+    void gotoWorkoutTrainingItem(int index) {
+        boolean isInTraining;
+        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
+        if (model != null && !model.isLocked()) {
+            isInTraining = model.isInTraining();
+            if (isInTraining) {
+                this.workoutTrainingTimer.stop();
+            }
+            if (model.goToTrainingItem(index)) {
+                model.getCurrentWorkoutTrainingItem().resetDuration();
+            }
+            if (isInTraining) {
+                this.workoutTrainingTimer.start();
+            }
+        }
+    }
+
+    @Override
     void toggleLock() {
         WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
         if (model != null && model.isInTraining()) {

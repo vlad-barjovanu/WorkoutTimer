@@ -8,19 +8,25 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.Observable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.vbarjovanu.workouttimer.BR;
 import com.vbarjovanu.workouttimer.IMainActivityViewModel;
 import com.vbarjovanu.workouttimer.MainActivityActionData;
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.databinding.FragmentWorkoutTrainingBinding;
 import com.vbarjovanu.workouttimer.helpers.vibration.VibrationHelper;
 import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
+import com.vbarjovanu.workouttimer.ui.generic.recyclerview.RecyclerViewItemActionData;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 import com.vbarjovanu.workouttimer.ui.workouts.training.actions.DurationChangeActionData;
 import com.vbarjovanu.workouttimer.ui.workouts.training.actions.WorkoutTrainingActionData;
+import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemModelsList;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingModel;
 
 public class WorkoutTrainingFragment extends Fragment implements WorkoutTrainingFragmentClickListners {
@@ -28,9 +34,8 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     private IWorkoutTrainingViewModel viewModel;
     private IMainActivityViewModel mainActivityViewModel;
     private FragmentWorkoutTrainingBinding binding;
-    private Observer<? super WorkoutTrainingModel> workoutObserver;
-    private Observer<? super WorkoutTrainingActionData> actionObserver;
-    private Observer<? super EventContent<MainActivityActionData>> mainActivityActionObserver;
+    private RecyclerView recyclerView;
+    private WorkoutItemsRecyclerViewAdapter workoutItemsAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -38,14 +43,16 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
 
         if (this.getActivity() != null) {
             this.viewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IWorkoutTrainingViewModel.class);
-            this.addWorkoutTrainingModelObserver();
-            this.addViewModelActionObserver();
+            this.viewModel.getWorkoutTrainingModel().observe(this, this::onWorkoutChanged);
+            this.viewModel.getAction().observe(this, this::onActionChanged);
             this.mainActivityViewModel = ViewModelProviders.of(this.getActivity(), CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
             this.mainActivityViewModel.showNewEntityButton(false);
             this.mainActivityViewModel.showSaveEntityButton(false);
-            this.addMainActivityViewModelActionObserver();
 
             root = inflater.inflate(R.layout.fragment_workout_training, container, false);
+            this.recyclerView = root.findViewById(R.id.fragment_workout_training_recyclerview_workout_training_items);
+            this.recyclerView.setHasFixedSize(true);
+            this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             this.binding = FragmentWorkoutTrainingBinding.bind(root);
             this.binding.setClickListners(this);
             this.binding.setWorkoutTrainingItemColorProvider(this.viewModel.getWorkoutTrainingItemColorProvider());
@@ -70,6 +77,11 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             //if it's changing configurations don't stop the training
             this.viewModel.stopWorkoutTraining();
             this.viewModel.close();
+
+            if (this.workoutItemsAdapter != null) {
+                this.workoutItemsAdapter.getItemAction().removeObserver(this::onWorkoutItemsRecyclerViewItemActionDataChanged);
+            }
+            this.recyclerView.setAdapter(null);
         }
     }
 
@@ -97,26 +109,41 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     @Override
     public void onDestroy() {
         super.onDestroy();
-        this.removeWorkoutTrainingModelObserver();
-        this.removeViewModelActionObserver();
-        this.removeMainActivityViewModelActionObserver();
-    }
-
-    private void removeWorkoutTrainingModelObserver() {
-        if (this.viewModel != null && this.workoutObserver != null) {
-            this.viewModel.getWorkoutTrainingModel().removeObserver(this.workoutObserver);
-            this.workoutObserver = null;
+        if (this.viewModel != null) {
+            this.viewModel.getWorkoutTrainingModel().removeObserver(this::onWorkoutChanged);
+            this.viewModel.getAction().removeObserver(this::onActionChanged);
         }
     }
 
-    private void addWorkoutTrainingModelObserver() {
-        this.workoutObserver = (Observer<WorkoutTrainingModel>) WorkoutTrainingFragment.this::onWorkoutChanged;
-        this.viewModel.getWorkoutTrainingModel().observe(this, this.workoutObserver);
+    private void onWorkoutChanged(WorkoutTrainingModel workoutTrainingModel) {
+
+        this.binding.setWorkoutTrainingModel(workoutTrainingModel);
+        this.addWorkoutItemsAdapter(workoutTrainingModel.getWorkoutTrainingItems());
+        //when it's restored from saved instance, .inTraining property is true so that's why the timer won't start
     }
 
-    private void onWorkoutChanged(WorkoutTrainingModel workoutTrainingModel) {
-        this.binding.setWorkoutTrainingModel(workoutTrainingModel);
-        //when it's restored from saved instance, .inTraining property is true so that's why the timer won't start
+    /**
+     * Scrolls the current workout training item into visible area of recycler view
+     *
+     * @param workoutTrainingModel workout training model
+     */
+    private void scrollWorkoutTrainingItemIntoView(WorkoutTrainingModel workoutTrainingModel) {
+        workoutTrainingModel.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                if (propertyId == com.vbarjovanu.workouttimer.BR.currentWorkoutTrainingItem) {
+                    if (WorkoutTrainingFragment.this.getActivity() != null) {
+                        WorkoutTrainingFragment.this.getActivity().runOnUiThread(() -> {
+                            LinearLayoutManager layoutManager;
+                            layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.recyclerView.getLayoutManager());
+                            if (layoutManager != null) {
+                                layoutManager.scrollToPositionWithOffset(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex(), 0);
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -155,35 +182,6 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
         mediaPlayer.setOnCompletionListener(mp -> mp.release());
     }
 
-    private void removeViewModelActionObserver() {
-        if (this.viewModel != null && this.actionObserver != null) {
-            this.viewModel.getAction().removeObserver(this.actionObserver);
-            this.actionObserver = null;
-        }
-    }
-
-    private void addViewModelActionObserver() {
-        this.actionObserver = (Observer<WorkoutTrainingActionData>) this::onActionChanged;
-        this.viewModel.getAction().observe(this, this.actionObserver);
-    }
-
-    private void removeMainActivityViewModelActionObserver() {
-        if (this.mainActivityViewModel != null && this.mainActivityActionObserver != null) {
-            this.mainActivityViewModel.getAction().removeObserver(this.mainActivityActionObserver);
-            this.mainActivityActionObserver = null;
-        }
-    }
-
-    private void addMainActivityViewModelActionObserver() {
-        this.mainActivityActionObserver = (Observer<EventContent<MainActivityActionData>>) this::onMainActivityActionChanged;
-        this.mainActivityViewModel.getAction().observe(this, this.mainActivityActionObserver);
-    }
-
-    private void onMainActivityActionChanged(@NonNull EventContent<MainActivityActionData> eventContent) {
-//        MainActivityActionData mainActivityActionData = eventContent.getContent();
-    }
-
-
     @Override
     public void onSoundClick(View view) {
         this.viewModel.toggleSound();
@@ -218,4 +216,20 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     public void onPreviousWorkoutItemClick(View view) {
         this.viewModel.previousWorkoutTrainingItem();
     }
+
+    private void addWorkoutItemsAdapter(WorkoutTrainingItemModelsList workoutTrainingItemModels) {
+        if (this.workoutItemsAdapter != null) {
+            this.workoutItemsAdapter.getItemAction().removeObserver(this::onWorkoutItemsRecyclerViewItemActionDataChanged);
+        }
+        this.workoutItemsAdapter = new WorkoutItemsRecyclerViewAdapter(workoutTrainingItemModels);
+        this.workoutItemsAdapter.getItemAction().observe(this, this::onWorkoutItemsRecyclerViewItemActionDataChanged);
+        this.recyclerView.swapAdapter(this.workoutItemsAdapter, false);
+    }
+
+    private void onWorkoutItemsRecyclerViewItemActionDataChanged(RecyclerViewItemActionData<WorkoutItemsRecyclerViewItemAction> itemActionData) {
+        if (itemActionData.getAction() == WorkoutItemsRecyclerViewItemAction.WORKOUT_ITEM_SELECT) {
+            this.viewModel.gotoWorkoutTrainingItem(Integer.parseInt(itemActionData.getId()));
+        }
+    }
+
 }

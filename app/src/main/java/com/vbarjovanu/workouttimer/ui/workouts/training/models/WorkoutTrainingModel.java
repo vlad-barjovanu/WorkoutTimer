@@ -20,7 +20,7 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
     @NonNull
     private final Workout workout;
     private final boolean includeLastRest;
-    private List<WorkoutTrainingItemModel> workoutTrainingItems;
+    private WorkoutTrainingItemModelsList workoutTrainingItems;
     private int currentIndex;
     private boolean inTraining;
     transient private Observable.OnPropertyChangedCallback onPropertyChangedCallback;
@@ -80,8 +80,7 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
         return d;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public List<WorkoutTrainingItemModel> getWorkoutTrainingItems() {
+    public WorkoutTrainingItemModelsList getWorkoutTrainingItems() {
         return workoutTrainingItems;
     }
 
@@ -183,7 +182,6 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
      * @param index training item index
      * @return true if moved to desired training item
      */
-    @SuppressWarnings("WeakerAccess")
     public boolean goToTrainingItem(int index) {
         boolean result = false;
         int count = 0;
@@ -225,11 +223,11 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
         coolDownDuration = (this.workout.getCoolDownDuration() == null) ? 0 : this.workout.getCoolDownDuration();
         increaseDuration = this.workout.isIncreaseDuration();
 
-        index = 1;
+        index = 0;
         setIndex = 1;
         cycleIndex = 1;
-        this.workoutTrainingItems = new ArrayList<>();
-        this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.PREPARE, prepareDuration, increaseDuration, index, cycleIndex, setIndex));
+        this.workoutTrainingItems = new WorkoutTrainingItemModelsList();
+        this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.PREPARE, prepareDuration, increaseDuration, index++, cycleIndex, setIndex));
         for (setIndex = 1; setIndex <= setsCount; setIndex++) {
             for (cycleIndex = 1; cycleIndex <= cyclesCount; cycleIndex++) {
                 if (workDuration > 0) {
