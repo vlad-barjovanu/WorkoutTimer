@@ -10,18 +10,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.Observable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.vbarjovanu.workouttimer.BR;
 import com.vbarjovanu.workouttimer.IMainActivityViewModel;
-import com.vbarjovanu.workouttimer.MainActivityActionData;
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.databinding.FragmentWorkoutTrainingBinding;
 import com.vbarjovanu.workouttimer.helpers.vibration.VibrationHelper;
-import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
 import com.vbarjovanu.workouttimer.ui.generic.recyclerview.RecyclerViewItemActionData;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 import com.vbarjovanu.workouttimer.ui.workouts.training.actions.DurationChangeActionData;
@@ -34,12 +29,11 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     private IWorkoutTrainingViewModel viewModel;
     private IMainActivityViewModel mainActivityViewModel;
     private FragmentWorkoutTrainingBinding binding;
-    private RecyclerView recyclerView;
-    private WorkoutItemsRecyclerViewAdapter workoutItemsAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = null;
+        WorkoutItemsRecyclerViewAdapter workoutItemsAdapter;
 
         if (this.getActivity() != null) {
             this.viewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IWorkoutTrainingViewModel.class);
@@ -50,13 +44,13 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             this.mainActivityViewModel.showSaveEntityButton(false);
 
             root = inflater.inflate(R.layout.fragment_workout_training, container, false);
-            //TODO: get rid of recyclerView findViewById and use binding to bind data to
-            this.recyclerView = root.findViewById(R.id.fragment_workout_training_recyclerview_workout_training_items);
-            this.recyclerView.setHasFixedSize(true);
-            this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             this.binding = FragmentWorkoutTrainingBinding.bind(root);
             this.binding.setClickListners(this);
             this.binding.setWorkoutTrainingItemColorProvider(this.viewModel.getWorkoutTrainingItemColorProvider());
+            workoutItemsAdapter = new WorkoutItemsRecyclerViewAdapter(new WorkoutTrainingItemModelsList());
+            workoutItemsAdapter.getItemAction().observe(this, this::onWorkoutItemsRecyclerViewItemActionDataChanged);
+            this.binding.setRecyclerViewAdapter(workoutItemsAdapter);
+            this.binding.setLayoutManager(new LinearLayoutManager(getContext()));
         }
         return root;
     }
@@ -79,10 +73,10 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             this.viewModel.stopWorkoutTraining();
             this.viewModel.close();
 
-            if (this.workoutItemsAdapter != null) {
-                this.workoutItemsAdapter.getItemAction().removeObserver(this::onWorkoutItemsRecyclerViewItemActionDataChanged);
+            if (this.binding.getRecyclerViewAdapter() != null) {
+                this.binding.getRecyclerViewAdapter().getItemAction().removeObserver(this::onWorkoutItemsRecyclerViewItemActionDataChanged);
+                this.binding.setRecyclerViewAdapter(null);
             }
-            this.recyclerView.setAdapter(null);
         }
     }
 
@@ -117,10 +111,8 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     }
 
     private void onWorkoutChanged(WorkoutTrainingModel workoutTrainingModel) {
-
         this.binding.setWorkoutTrainingModel(workoutTrainingModel);
-        this.addWorkoutItemsAdapter(workoutTrainingModel.getWorkoutTrainingItems());
-        //when it's restored from saved instance, .inTraining property is true so that's why the timer won't start
+        this.scrollWorkoutTrainingItemIntoView(workoutTrainingModel);
     }
 
     /**
@@ -136,7 +128,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
                     if (WorkoutTrainingFragment.this.getActivity() != null) {
                         WorkoutTrainingFragment.this.getActivity().runOnUiThread(() -> {
                             LinearLayoutManager layoutManager;
-                            layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.recyclerView.getLayoutManager());
+                            layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.binding.getLayoutManager());
                             if (layoutManager != null) {
                                 layoutManager.scrollToPositionWithOffset(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex(), 0);
                                 //TODO: add selection support to recyclerview
@@ -222,15 +214,6 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     @Override
     public void onDurationClick(View view) {
         this.viewModel.toggleDisplayRemainingDuration();
-    }
-
-    private void addWorkoutItemsAdapter(WorkoutTrainingItemModelsList workoutTrainingItemModels) {
-        if (this.workoutItemsAdapter != null) {
-            this.workoutItemsAdapter.getItemAction().removeObserver(this::onWorkoutItemsRecyclerViewItemActionDataChanged);
-        }
-        this.workoutItemsAdapter = new WorkoutItemsRecyclerViewAdapter(workoutTrainingItemModels);
-        this.workoutItemsAdapter.getItemAction().observe(this, this::onWorkoutItemsRecyclerViewItemActionDataChanged);
-        this.recyclerView.swapAdapter(this.workoutItemsAdapter, false);
     }
 
     private void onWorkoutItemsRecyclerViewItemActionDataChanged(RecyclerViewItemActionData<WorkoutItemsRecyclerViewItemAction> itemActionData) {

@@ -20,6 +20,10 @@
 
         <import type="com.vbarjovanu.workouttimer.ui.workouts.training.models.IWorkoutTrainingItemColorProvider" />
 
+        <import type="com.vbarjovanu.workouttimer.ui.workouts.training.WorkoutItemsRecyclerViewAdapter" />
+
+        <import type="androidx.recyclerview.widget.RecyclerView.LayoutManager"/>
+
         <variable
             name="workoutTrainingModel"
             type="WorkoutTrainingModel" />
@@ -31,6 +35,15 @@
         <variable
             name="clickListners"
             type="WorkoutTrainingFragmentClickListners" />
+
+        <variable
+            name="recyclerViewAdapter"
+            type="WorkoutItemsRecyclerViewAdapter" />
+
+        <variable
+            name="layoutManager"
+            type="LayoutManager" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -148,6 +161,10 @@
             android:scrollbars="vertical"
             android:textAlignment="center"
             android:textSize="20sp"
+            app:adapter="@{recyclerViewAdapter}"
+            app:data="@{workoutTrainingModel.workoutTrainingItems}"
+            app:layoutManager="@{layoutManager}"
+            app:hasFixedSize="@{true}"
             app:layout_constraintBottom_toTopOf="@+id/fragment_workout_training_textview_cycle_index"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
