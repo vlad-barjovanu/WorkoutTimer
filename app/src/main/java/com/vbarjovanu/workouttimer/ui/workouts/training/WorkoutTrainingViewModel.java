@@ -19,11 +19,12 @@ import com.vbarjovanu.workouttimer.ui.workouts.training.logic.IWorkoutTrainingTi
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.IWorkoutTrainingItemColorProvider;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemColorProvider;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemModel;
-import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemType;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingModel;
 
-import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
     private IWorkoutTrainingItemColorProvider workoutTrainingItemColorProvider;
@@ -158,28 +159,31 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
         }));
     }
 
+    private void toggle(Function<WorkoutTrainingModel, Boolean> condition, java.util.function.BiFunction<WorkoutTrainingModel, Boolean, WorkoutTrainingModel> setter, Function<WorkoutTrainingModel, Boolean> getter) {
+        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
+        if (model != null && condition.apply(model)) {
+            setter.apply(model, !getter.apply(model));
+        }
+    }
+
     @Override
     void toggleLock() {
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && model.isInTraining()) {
-            model.setLocked(!model.isLocked());
-        }
+        this.toggle(WorkoutTrainingModel::isInTraining, WorkoutTrainingModel::setLocked, WorkoutTrainingModel::isLocked);
     }
 
     @Override
     public void toggleSound() {
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && !model.isLocked()) {
-            model.setSoundOn(!model.isSoundOn());
-        }
+        this.toggle(model -> !model.isLocked(), WorkoutTrainingModel::setSoundOn, WorkoutTrainingModel::isSoundOn);
     }
 
     @Override
     public void toggleVibrate() {
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && !model.isLocked()) {
-            model.setVibrateOn(!model.isVibrateOn());
-        }
+        this.toggle(model -> !model.isLocked(), WorkoutTrainingModel::setVibrateOn, WorkoutTrainingModel::isVibrateOn);
+    }
+
+    @Override
+    public void toggleDisplayRemainingDuration() {
+        this.toggle(model -> !model.isLocked(), WorkoutTrainingModel::setDisplayRemainingDuration, WorkoutTrainingModel::isDisplayRemainingDuration);
     }
 
     @Override

@@ -65,5 +65,7 @@
     <string name="next_workout_item">Next workout item</string>
     <string name="sound">Sound</string>
     <string name="vibrate">Vibrate</string>
+    <string name="message_workout_training_fragment_duration">+ %d</string>
+    <string name="message_workout_training_fragment_remaining_duration">- %d</string>
 
 </resources>

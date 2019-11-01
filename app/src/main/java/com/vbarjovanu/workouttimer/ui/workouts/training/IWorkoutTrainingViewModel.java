@@ -39,4 +39,6 @@ public abstract class IWorkoutTrainingViewModel extends ViewModel implements ISy
     public abstract void toggleSound();
 
     public abstract void toggleVibrate();
+
+    public abstract void toggleDisplayRemainingDuration();
 }

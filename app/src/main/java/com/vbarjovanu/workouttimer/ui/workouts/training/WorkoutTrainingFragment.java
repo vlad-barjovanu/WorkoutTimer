@@ -219,6 +219,11 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
         this.viewModel.previousWorkoutTrainingItem();
     }
 
+    @Override
+    public void onDurationClick(View view) {
+        this.viewModel.toggleDisplayRemainingDuration();
+    }
+
     private void addWorkoutItemsAdapter(WorkoutTrainingItemModelsList workoutTrainingItemModels) {
         if (this.workoutItemsAdapter != null) {
             this.workoutItemsAdapter.getItemAction().removeObserver(this::onWorkoutItemsRecyclerViewItemActionDataChanged);
