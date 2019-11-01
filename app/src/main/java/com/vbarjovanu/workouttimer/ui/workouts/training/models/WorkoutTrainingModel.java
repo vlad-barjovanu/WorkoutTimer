@@ -1,19 +1,13 @@
 package com.vbarjovanu.workouttimer.ui.workouts.training.models;
 
-import android.graphics.Color;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.databinding.Observable;
 
-import com.vbarjovanu.workouttimer.BR;
 import com.vbarjovanu.workouttimer.business.models.workouts.Workout;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class WorkoutTrainingModel extends BaseObservable implements Serializable {
 
@@ -66,16 +60,20 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
 
     private int computeInitialDurationFromIndex(int index) {
         int d = 0;
-        for (int i = index; i < this.workoutTrainingItems.size(); i++) {
-            d += this.workoutTrainingItems.get(i).getInitialDuration();
+        if (index >= 0 && index < this.workoutTrainingItems.size()) {
+            for (int i = index; i < this.workoutTrainingItems.size(); i++) {
+                d += this.workoutTrainingItems.get(i).getInitialDuration();
+            }
         }
         return d;
     }
 
     private int computeRemainingDurationFromIndex(int index) {
         int d = 0;
-        for (int i = index; i < this.workoutTrainingItems.size(); i++) {
-            d += this.workoutTrainingItems.get(i).getRemainingDuration();
+        if (index >= 0 && index < this.workoutTrainingItems.size()) {
+            for (int i = index; i < this.workoutTrainingItems.size(); i++) {
+                d += this.workoutTrainingItems.get(i).getRemainingDuration();
+            }
         }
         return d;
     }

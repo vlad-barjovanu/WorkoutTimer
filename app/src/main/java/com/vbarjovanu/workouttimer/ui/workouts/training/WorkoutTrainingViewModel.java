@@ -105,8 +105,7 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
         //TODO set action GOTO workouts
     }
 
-    @Override
-    void nextWorkoutTrainingItem() {
+    private void switchWorkoutTrainingItem(java.util.function.Consumer<WorkoutTrainingModel> func) {
         boolean isInTraining;
         WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
         if (model != null && !model.isLocked()) {
@@ -114,49 +113,49 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
             if (isInTraining) {
                 this.workoutTrainingTimer.stop();
             }
-            if (model.nextTrainingItem()) {
-                model.getCurrentWorkoutTrainingItem().resetDuration();
-            }
+            func.accept(model);
             if (isInTraining) {
                 this.workoutTrainingTimer.start();
             }
         }
+    }
+
+    @Override
+    void nextWorkoutTrainingItem() {
+        this.switchWorkoutTrainingItem((model -> {
+            model.getCurrentWorkoutTrainingItem().setDurationComplete();
+            if (model.nextTrainingItem()) {
+                model.getCurrentWorkoutTrainingItem().resetDuration();
+            }
+        }));
     }
 
     @Override
     void previousWorkoutTrainingItem() {
-        boolean isInTraining;
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && !model.isLocked()) {
-            isInTraining = model.isInTraining();
-            if (isInTraining) {
-                this.workoutTrainingTimer.stop();
-            }
+        this.switchWorkoutTrainingItem((model -> {
+            model.getCurrentWorkoutTrainingItem().resetDuration();
             if (model.previousTrainingItem()) {
                 model.getCurrentWorkoutTrainingItem().resetDuration();
             }
-            if (isInTraining) {
-                this.workoutTrainingTimer.start();
-            }
-        }
+        }));
     }
 
     @Override
     void gotoWorkoutTrainingItem(int index) {
-        boolean isInTraining;
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && !model.isLocked()) {
-            isInTraining = model.isInTraining();
-            if (isInTraining) {
-                this.workoutTrainingTimer.stop();
+        this.switchWorkoutTrainingItem((model -> {
+            if (index >= 0 && index < model.getWorkoutTrainingItems().size()) {
+                if (index > model.getCurrentWorkoutTrainingItem().getTotalIndex()) {
+                    model.getWorkoutTrainingItems().subList(model.getCurrentWorkoutTrainingItem().getTotalIndex(), index).forEach(WorkoutTrainingItemModel::setDurationComplete);
+                }
+                if (index < model.getCurrentWorkoutTrainingItem().getTotalIndex()) {
+                    model.getWorkoutTrainingItems().subList(index + 1, model.getCurrentWorkoutTrainingItem().getTotalIndex() + 1).forEach(WorkoutTrainingItemModel::resetDuration);
+                }
+
+                if (model.goToTrainingItem(index)) {
+                    model.getCurrentWorkoutTrainingItem().resetDuration();
+                }
             }
-            if (model.goToTrainingItem(index)) {
-                model.getCurrentWorkoutTrainingItem().resetDuration();
-            }
-            if (isInTraining) {
-                this.workoutTrainingTimer.start();
-            }
-        }
+        }));
     }
 
     @Override

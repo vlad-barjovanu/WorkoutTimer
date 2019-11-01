@@ -151,6 +151,23 @@ public class WorkoutTrainingItemModel extends BaseObservable implements Serializ
     }
 
     /**
+     * Changes the duration by incrementing or decrementing it, based on the increaseDuration flag, up till complete
+     *
+     * @return the new duration value
+     */
+    public int setDurationComplete(){
+        int value;
+        if (this.increaseDuration) {
+            value = this.initialDuration;
+        } else {
+            value = 0;
+        }
+        this.duration.getAndSet(value);
+        this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.duration);
+        return value;
+    }
+
+    /**
      * Checks if the workout training item is at start (duration was altered zero times since initial duration)
      * When increaseDuration flag is true it means the current value equals 0
      * When increaseDuration flag is false it means the current value equals the initial duration

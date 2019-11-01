@@ -50,6 +50,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             this.mainActivityViewModel.showSaveEntityButton(false);
 
             root = inflater.inflate(R.layout.fragment_workout_training, container, false);
+            //TODO: get rid of recyclerView findViewById and use binding to bind data to
             this.recyclerView = root.findViewById(R.id.fragment_workout_training_recyclerview_workout_training_items);
             this.recyclerView.setHasFixedSize(true);
             this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -138,6 +139,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
                             layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.recyclerView.getLayoutManager());
                             if (layoutManager != null) {
                                 layoutManager.scrollToPositionWithOffset(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex(), 0);
+                                //TODO: add selection support to recyclerview
                             }
                         });
                     }
