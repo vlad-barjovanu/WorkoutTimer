@@ -6,24 +6,22 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.vbarjovanu.workouttimer.IMainActivityViewModel;
 import com.vbarjovanu.workouttimer.MainActivityAction;
 import com.vbarjovanu.workouttimer.MainActivityActionData;
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList;
+import com.vbarjovanu.workouttimer.databinding.FragmentWorkoutsBinding;
 import com.vbarjovanu.workouttimer.session.ApplicationSessionFactory;
 import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
 import com.vbarjovanu.workouttimer.ui.generic.recyclerview.RecyclerViewItemActionData;
@@ -32,23 +30,23 @@ import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 public class WorkoutsFragment extends Fragment {
 
     private IMainActivityViewModel mainActivityViewModel;
-    private WorkoutsRecyclerViewAdapter workoutsAdapter;
     private IWorkoutsViewModel workoutsViewModel;
-    private RecyclerView recyclerView;
-    private TextView textViewDescription;
-
-    private Observer<EventContent<MainActivityActionData>> mainActivityViewModelObserver;
-    private Observer<WorkoutsFragmentActionData> workoutsViewModelActionDataObserver;
-    private Observer<WorkoutsList> workoutsListObserver;
-    private Observer<RecyclerViewItemActionData<WorkoutsRecyclerViewItemAction>> workoutsAdapterItemActionObserver;
+    private FragmentWorkoutsBinding binding;
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        this.removeMainActivityActionObserver();
-        this.removeWorkoutsViewModelActionDataObserver();
-        this.removeWorkoutsViewModelWorkoutsObserver();
-        this.removeWorkoutsAdapter(true);
+        if (this.mainActivityViewModel != null) {
+            this.mainActivityViewModel.getAction().removeObserver(this::onMainActivityAction);
+        }
+        if (this.workoutsViewModel != null) {
+            this.workoutsViewModel.getActionData().removeObserver(this::onViewModelAction);
+            this.workoutsViewModel.getWorkouts().removeObserver(this::onWorkoutsListChanged);
+        }
+        if (this.binding != null) {
+            this.binding.getRecyclerViewAdapter().getItemAction().removeObserver(this::onRecyclerViewItemAction);
+            this.binding.setRecyclerViewAdapter(null);
+        }
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,16 +58,16 @@ public class WorkoutsFragment extends Fragment {
             mainActivityViewModel.showNewEntityButton(true);
             mainActivityViewModel.showSaveEntityButton(false);
             root = inflater.inflate(R.layout.fragment_workouts, container, false);
-            textViewDescription = root.findViewById(R.id.text_workouts_description);
-            textViewDescription.setText(getString(R.string.message_no_workouts_are_defined));
-            textViewDescription.setVisibility(View.GONE);
-            this.recyclerView = root.findViewById(R.id.recyclerview_workouts);
-            this.recyclerView.setHasFixedSize(true);
-            this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-            this.addWorkoutsViewModelWorkoutsObserver();
-            this.addWorkoutsViewModelActionDataObserver();
-            this.addMainActivityActionObserver();
+            this.binding = FragmentWorkoutsBinding.bind(root);
+            this.binding.setLayoutManager(new LinearLayoutManager(getContext()));
+            WorkoutsRecyclerViewAdapter workoutsAdapter = new WorkoutsRecyclerViewAdapter(new WorkoutsList());
+            workoutsAdapter.getItemAction().observe(this, this::onRecyclerViewItemAction);
+            this.binding.setRecyclerViewAdapter(workoutsAdapter);
+
+            this.workoutsViewModel.getWorkouts().observe(this, this::onWorkoutsListChanged);
+            this.workoutsViewModel.getActionData().observe(this, this::onViewModelAction);
+            this.mainActivityViewModel.getAction().observe(this, this::onMainActivityAction);
         }
         return root;
     }
@@ -113,82 +111,13 @@ public class WorkoutsFragment extends Fragment {
         workoutsViewModel.trainWorkout(profileId, workoutId);
     }
 
-    private void removeWorkoutsAdapterActionObserver() {
-        if (this.workoutsAdapter != null && this.workoutsAdapterItemActionObserver != null) {
-            this.workoutsAdapter.getItemAction().removeObserver(this.workoutsAdapterItemActionObserver);
-            this.workoutsAdapterItemActionObserver = null;
-        }
-    }
-
-    private void addWorkoutsAdapterItemActionObserver() {
-        this.workoutsAdapterItemActionObserver = this::onWorkoutsRecyclerViewItemActionDataChanged;
-        this.workoutsAdapter.getItemAction().observe(this, this.workoutsAdapterItemActionObserver);
-    }
-
-    private void removeWorkoutsAdapter(boolean removeAdapter) {
-        this.removeWorkoutsAdapterActionObserver();
-        if (removeAdapter) {
-            this.recyclerView.setAdapter(null);
-        }
-    }
-
-    private void addWorkoutsAdapter(WorkoutsList workouts) {
-        this.removeWorkoutsAdapter(false);
-        this.workoutsAdapter = new WorkoutsRecyclerViewAdapter(workouts);
-        this.addWorkoutsAdapterItemActionObserver();
-        this.recyclerView.swapAdapter(this.workoutsAdapter, false);
-    }
-
-    private void removeWorkoutsViewModelWorkoutsObserver() {
-        if (this.workoutsViewModel != null && this.workoutsListObserver != null) {
-            this.workoutsViewModel.getWorkouts().removeObserver(this.workoutsListObserver);
-            this.workoutsListObserver = null;
-        }
-    }
-
-    private void addWorkoutsViewModelWorkoutsObserver() {
-        this.workoutsListObserver = WorkoutsFragment.this::onWorkoutsListChanged;
-        this.workoutsViewModel.getWorkouts().observe(this, this.workoutsListObserver);
-    }
-
-    private void removeWorkoutsViewModelActionDataObserver() {
-        if (workoutsViewModel != null && this.workoutsViewModelActionDataObserver != null) {
-            workoutsViewModel.getActionData().removeObserver(this.workoutsViewModelActionDataObserver);
-            this.workoutsViewModelActionDataObserver = null;
-        }
-    }
-
-    private void addWorkoutsViewModelActionDataObserver() {
-        this.workoutsViewModelActionDataObserver = this::onWorkoutsFragmentActionDataChanged;
-        this.workoutsViewModel.getActionData().observe(this, this.workoutsViewModelActionDataObserver);
-    }
-
-    private void removeMainActivityActionObserver() {
-        if (this.mainActivityViewModel != null && this.mainActivityViewModelObserver != null) {
-            this.mainActivityViewModel.getAction().removeObserver(this.mainActivityViewModelObserver);
-            this.mainActivityViewModelObserver = null;
-        }
-    }
-
-    private void addMainActivityActionObserver() {
-        this.mainActivityViewModelObserver = this::onMainActivityActionDataChanged;
-        this.mainActivityViewModel.getAction().observe(this, this.mainActivityViewModelObserver);
-    }
-
     /**
      * When workouts list changes, the recycler view adapter is initialized
      *
      * @param workouts list of workouts
      */
     private void onWorkoutsListChanged(WorkoutsList workouts) {
-        this.addWorkoutsAdapter(workouts);
-        if (workouts.size() == 0) {
-            this.textViewDescription.setVisibility(View.VISIBLE);
-            this.recyclerView.setVisibility(View.GONE);
-        } else {
-            this.textViewDescription.setVisibility(View.GONE);
-            this.recyclerView.setVisibility(View.VISIBLE);
-        }
+        this.binding.setWorkoutsList(workouts);
     }
 
     /**
@@ -196,7 +125,7 @@ public class WorkoutsFragment extends Fragment {
      *
      * @param workoutActionData user action data
      */
-    private void onWorkoutsRecyclerViewItemActionDataChanged(RecyclerViewItemActionData<WorkoutsRecyclerViewItemAction> workoutActionData) {
+    private void onRecyclerViewItemAction(RecyclerViewItemActionData<WorkoutsRecyclerViewItemAction> workoutActionData) {
         switch (workoutActionData.getAction()) {
             case WORKOUT_SELECT:
             case WORKOUT_EDIT:
@@ -216,7 +145,7 @@ public class WorkoutsFragment extends Fragment {
      *
      * @param workoutsFragmentActionData action data
      */
-    private void onWorkoutsFragmentActionDataChanged(WorkoutsFragmentActionData workoutsFragmentActionData) {
+    private void onViewModelAction(WorkoutsFragmentActionData workoutsFragmentActionData) {
         @SuppressWarnings("ConstantConditions")
         NavController navController = Navigation.findNavController(WorkoutsFragment.this.getActivity(), R.id.nav_host_fragment);
         Bundle args;
@@ -249,7 +178,7 @@ public class WorkoutsFragment extends Fragment {
      *
      * @param eventContent event data
      */
-    private void onMainActivityActionDataChanged(EventContent<MainActivityActionData> eventContent) {
+    private void onMainActivityAction(EventContent<MainActivityActionData> eventContent) {
         MainActivityActionData mainActivityActionData;
         String profileId = ApplicationSessionFactory.getApplicationSession(this.getContext()).getUserProfileId();
         mainActivityActionData = eventContent.getContent();
