@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -48,7 +49,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             this.binding.setClickListners(this);
             this.binding.setWorkoutTrainingItemColorProvider(this.viewModel.getWorkoutTrainingItemColorProvider());
             workoutItemsAdapter = new WorkoutItemsRecyclerViewAdapter(new WorkoutTrainingItemModelsList());
-            workoutItemsAdapter.getItemAction().observe(this, this::onWorkoutItemsRecyclerViewItemActionDataChanged);
+            workoutItemsAdapter.getItemAction().observe(this, this::onRecyclerViewItemAction);
             this.binding.setRecyclerViewAdapter(workoutItemsAdapter);
             this.binding.setLayoutManager(new LinearLayoutManager(getContext()));
         }
@@ -74,9 +75,10 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             this.viewModel.close();
 
             if (this.binding.getRecyclerViewAdapter() != null) {
-                this.binding.getRecyclerViewAdapter().getItemAction().removeObserver(this::onWorkoutItemsRecyclerViewItemActionDataChanged);
+                this.binding.getRecyclerViewAdapter().getItemAction().removeObserver(this::onRecyclerViewItemAction);
                 this.binding.setRecyclerViewAdapter(null);
             }
+            this.keepScreenOn(false);
         }
     }
 
@@ -112,7 +114,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
 
     private void onWorkoutChanged(WorkoutTrainingModel workoutTrainingModel) {
         this.binding.setWorkoutTrainingModel(workoutTrainingModel);
-        this.scrollWorkoutTrainingItemIntoView(workoutTrainingModel);
+        this.observerWorkoutTrainingModelPropertiesChanges(workoutTrainingModel);
     }
 
     /**
@@ -120,26 +122,59 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
      *
      * @param workoutTrainingModel workout training model
      */
-    private void scrollWorkoutTrainingItemIntoView(WorkoutTrainingModel workoutTrainingModel) {
+    private void observerWorkoutTrainingModelPropertiesChanges(WorkoutTrainingModel workoutTrainingModel) {
         workoutTrainingModel.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                if (propertyId == com.vbarjovanu.workouttimer.BR.currentWorkoutTrainingItem) {
-                    if (WorkoutTrainingFragment.this.getActivity() != null) {
-                        WorkoutTrainingFragment.this.getActivity().runOnUiThread(() -> {
-                            LinearLayoutManager layoutManager;
-                            layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.binding.getLayoutManager());
-                            if (layoutManager != null) {
-                                layoutManager.scrollToPositionWithOffset(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex(), 0);
-                                //TODO: add selection support to recyclerview
-                            }
-                        });
-                    }
+                switch (propertyId) {
+                    case com.vbarjovanu.workouttimer.BR.currentWorkoutTrainingItem:
+                        scrollTrainingItemIntoView(workoutTrainingModel);
+                        break;
+                    case com.vbarjovanu.workouttimer.BR.inTraining:
+                        keepScreenOn(workoutTrainingModel.isInTraining());
+                        break;
                 }
             }
         });
     }
 
+    /**
+     * If enabled, keeps the screen always on
+     *
+     * @param screenOn true in order to keep the screen always on. False otherwise
+     */
+    private void keepScreenOn(boolean screenOn) {
+        if (this.getActivity() != null && this.getActivity().getWindow() != null) {
+            if (screenOn)
+                this.getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            else
+                this.getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    /**
+     * Brings the current training item into the visible area of the recycler view
+     *
+     * @param workoutTrainingModel workout training model
+     */
+    private void scrollTrainingItemIntoView(WorkoutTrainingModel workoutTrainingModel) {
+        if (WorkoutTrainingFragment.this.getActivity() != null) {
+            WorkoutTrainingFragment.this.getActivity().runOnUiThread(() -> {
+                LinearLayoutManager layoutManager;
+                layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.binding.getLayoutManager());
+                if (layoutManager != null) {
+                    layoutManager.scrollToPositionWithOffset(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex(), 0);
+                    //TODO: add selection support to recyclerview
+                }
+            });
+        }
+    }
+
+    /**
+     * Eventhandler of viewmodel's actions
+     *
+     * @param actionData action's data
+     */
     @SuppressWarnings("ConstantConditions")
     private <T extends WorkoutTrainingActionData> void onActionChanged(T actionData) {
         DurationChangeActionData durationChangeActionData;
@@ -169,11 +204,15 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
         }
     }
 
+    /**
+     * Plays a certain sound resource
+     *
+     * @param soundId ID of the sound resource to be played
+     */
     private void playSound(int soundId) {
         MediaPlayer mediaPlayer = MediaPlayer.create(this.getContext(), soundId);
         mediaPlayer.start();
-        //noinspection Convert2MethodRef
-        mediaPlayer.setOnCompletionListener(mp -> mp.release());
+        mediaPlayer.setOnCompletionListener(MediaPlayer::release);
     }
 
     @Override
@@ -216,7 +255,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
         this.viewModel.toggleDisplayRemainingDuration();
     }
 
-    private void onWorkoutItemsRecyclerViewItemActionDataChanged(RecyclerViewItemActionData<WorkoutItemsRecyclerViewItemAction> itemActionData) {
+    private void onRecyclerViewItemAction(RecyclerViewItemActionData<WorkoutItemsRecyclerViewItemAction> itemActionData) {
         if (itemActionData.getAction() == WorkoutItemsRecyclerViewItemAction.WORKOUT_ITEM_SELECT) {
             this.viewModel.gotoWorkoutTrainingItem(Integer.parseInt(itemActionData.getId()));
         }
