@@ -8,6 +8,7 @@ import androidx.databinding.Observable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.vbarjovanu.workouttimer.BR;
 import com.vbarjovanu.workouttimer.business.models.workouts.Workout;
 import com.vbarjovanu.workouttimer.business.services.workouts.IWorkoutsService;
 import com.vbarjovanu.workouttimer.session.IApplicationSession;
@@ -19,6 +20,7 @@ import com.vbarjovanu.workouttimer.ui.workouts.training.logic.IWorkoutTrainingTi
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.IWorkoutTrainingItemColorProvider;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemColorProvider;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemModel;
+import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemType;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingModel;
 
 import java.util.concurrent.CountDownLatch;
@@ -201,24 +203,31 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
         WorkoutTrainingModel model;
         WorkoutTrainingItemModel itemModel;
         model = this.workoutTrainingModel.getValue();
-        if (model != null && model.isInTraining()) {
+        if (model != null) {
             itemModel = model.getCurrentWorkoutTrainingItem();
             if (itemModel != null) {
-                if (propertyId == com.vbarjovanu.workouttimer.BR.totalRemainingDuration) {
-                    if (itemModel.isAtStart()) {
-                        switch (itemModel.getType()) {
-                            case WORK:
-                                this.action.postValue(new DurationChangeActionData(WorkoutTrainingActions.MARK_START_WORK, model.isSoundOn(), model.isVibrateOn()));
-                                break;
-                            case REST:
-                            case SET_REST:
-                                this.action.postValue(new DurationChangeActionData(WorkoutTrainingActions.MARK_START_REST, model.isSoundOn(), model.isVibrateOn()));
-                                break;
+                if (model.isInTraining()) {
+                    if (propertyId == com.vbarjovanu.workouttimer.BR.totalRemainingDuration) {
+                        if (itemModel.isAtStart()) {
+                            switch (itemModel.getType()) {
+                                case WORK:
+                                    this.action.postValue(new DurationChangeActionData(WorkoutTrainingActions.MARK_START_WORK, model.isSoundOn(), model.isVibrateOn()));
+                                    break;
+                                case REST:
+                                case SET_REST:
+                                    this.action.postValue(new DurationChangeActionData(WorkoutTrainingActions.MARK_START_REST, model.isSoundOn(), model.isVibrateOn()));
+                                    break;
+                            }
+                        } else {
+                            if (itemModel.isCloseToCompletion() && !itemModel.isComplete()) {
+                                this.action.postValue(new DurationChangeActionData(WorkoutTrainingActions.MARK_DURATION_CHANGE, model.isSoundOn(), model.isVibrateOn()));
+                            }
                         }
-                    } else {
-                        if (itemModel.isCloseToCompletion() && !itemModel.isComplete()) {
-                            this.action.postValue(new DurationChangeActionData(WorkoutTrainingActions.MARK_DURATION_CHANGE, model.isSoundOn(), model.isVibrateOn()));
-                        }
+                    }
+                } else {
+                    if (propertyId == com.vbarjovanu.workouttimer.BR.inTraining && itemModel.isComplete() && itemModel.getType() == WorkoutTrainingItemType.COOL_DOWN) {
+                        //if is in training just changed from true to false (training finished) and current item training is COOL_DOWN than training is complete
+                        this.action.postValue(new DurationChangeActionData(WorkoutTrainingActions.MARK_TRAINING_COMPLETE, model.isSoundOn(), model.isVibrateOn()));
                     }
                 }
             }

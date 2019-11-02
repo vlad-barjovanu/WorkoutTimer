@@ -8,7 +8,7 @@ public class DurationChangeActionData extends WorkoutTrainingActionData {
         super(action);
         this.playSound = playSound;
         this.vibrate = vibrate;
-        if (action != WorkoutTrainingActions.MARK_DURATION_CHANGE && action != WorkoutTrainingActions.MARK_START_REST && action != WorkoutTrainingActions.MARK_START_WORK) {
+        if (action != WorkoutTrainingActions.MARK_DURATION_CHANGE && action != WorkoutTrainingActions.MARK_START_REST && action != WorkoutTrainingActions.MARK_START_WORK && action != WorkoutTrainingActions.MARK_TRAINING_COMPLETE) {
             throw new IllegalArgumentException(String.format("%s", action));
         }
     }

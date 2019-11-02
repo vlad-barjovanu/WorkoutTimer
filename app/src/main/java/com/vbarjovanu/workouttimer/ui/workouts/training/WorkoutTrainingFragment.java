@@ -18,12 +18,16 @@ import com.vbarjovanu.workouttimer.IMainActivityViewModel;
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.databinding.FragmentWorkoutTrainingBinding;
 import com.vbarjovanu.workouttimer.helpers.vibration.VibrationHelper;
+import com.vbarjovanu.workouttimer.ui.generic.mediaplayer.MediaPlayerQueue;
 import com.vbarjovanu.workouttimer.ui.generic.recyclerview.RecyclerViewItemActionData;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
 import com.vbarjovanu.workouttimer.ui.workouts.training.actions.DurationChangeActionData;
 import com.vbarjovanu.workouttimer.ui.workouts.training.actions.WorkoutTrainingActionData;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemModelsList;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WorkoutTrainingFragment extends Fragment implements WorkoutTrainingFragmentClickListners {
 
@@ -126,13 +130,17 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
         workoutTrainingModel.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                switch (propertyId) {
-                    case com.vbarjovanu.workouttimer.BR.currentWorkoutTrainingItem:
-                        scrollTrainingItemIntoView(workoutTrainingModel);
-                        break;
-                    case com.vbarjovanu.workouttimer.BR.inTraining:
-                        keepScreenOn(workoutTrainingModel.isInTraining());
-                        break;
+                if (WorkoutTrainingFragment.this.getActivity() != null) {
+                    WorkoutTrainingFragment.this.getActivity().runOnUiThread(() -> {
+                        switch (propertyId) {
+                            case com.vbarjovanu.workouttimer.BR.currentWorkoutTrainingItem:
+                                WorkoutTrainingFragment.this.scrollTrainingItemIntoView(workoutTrainingModel);
+                                break;
+                            case com.vbarjovanu.workouttimer.BR.inTraining:
+                                WorkoutTrainingFragment.this.keepScreenOn(workoutTrainingModel.isInTraining());
+                                break;
+                        }
+                    });
                 }
             }
         });
@@ -158,15 +166,11 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
      * @param workoutTrainingModel workout training model
      */
     private void scrollTrainingItemIntoView(WorkoutTrainingModel workoutTrainingModel) {
-        if (WorkoutTrainingFragment.this.getActivity() != null) {
-            WorkoutTrainingFragment.this.getActivity().runOnUiThread(() -> {
-                LinearLayoutManager layoutManager;
-                layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.binding.getLayoutManager());
-                if (layoutManager != null) {
-                    layoutManager.scrollToPositionWithOffset(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex(), 0);
-                    //TODO: add selection support to recyclerview
-                }
-            });
+        LinearLayoutManager layoutManager;
+        layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.binding.getLayoutManager());
+        if (layoutManager != null) {
+            layoutManager.scrollToPositionWithOffset(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex(), 0);
+            //TODO: add selection support to recyclerview
         }
     }
 
@@ -178,24 +182,28 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     @SuppressWarnings("ConstantConditions")
     private <T extends WorkoutTrainingActionData> void onActionChanged(T actionData) {
         DurationChangeActionData durationChangeActionData;
-        Integer soundId = null;
+        List<Integer> soundIds = new ArrayList<>();
         if (actionData != null) {
             if (actionData instanceof DurationChangeActionData) {
                 durationChangeActionData = (DurationChangeActionData) actionData;
                 switch (durationChangeActionData.getAction()) {
                     case MARK_START_WORK:
-                        soundId = R.raw.start_work_sound;
+                        soundIds.add(R.raw.start_work_sound);
                         break;
                     case MARK_START_REST:
-                        soundId = R.raw.start_rest_sound;
+                        soundIds.add(R.raw.start_rest_sound);
                         break;
                     case MARK_DURATION_CHANGE:
-                        soundId = R.raw.duration_sound;
+                        soundIds.add(R.raw.duration_sound);
+                        break;
+                    case MARK_TRAINING_COMPLETE:
+                        soundIds.add(R.raw.start_rest_sound);
+                        soundIds.add(R.raw.start_rest_sound);
                         break;
                 }
 
-                if (soundId != null && durationChangeActionData.isPlaySound()) {
-                    this.playSound(soundId);
+                if (!soundIds.isEmpty() && durationChangeActionData.isPlaySound()) {
+                    this.playSound(soundIds);
                 }
                 if (durationChangeActionData.isVibrate()) {
                     VibrationHelper.vibrate(this.getContext(), 300);
@@ -207,12 +215,13 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     /**
      * Plays a certain sound resource
      *
-     * @param soundId ID of the sound resource to be played
+     * @param soundIds array of IDs of the sound resources to be played
      */
-    private void playSound(int soundId) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(this.getContext(), soundId);
-        mediaPlayer.start();
-        mediaPlayer.setOnCompletionListener(MediaPlayer::release);
+    private void playSound(List<Integer> soundIds) {
+        MediaPlayerQueue mediaPlayerQueue;
+        mediaPlayerQueue = new MediaPlayerQueue(this.getContext());
+        mediaPlayerQueue.addSoundResource(soundIds);
+        mediaPlayerQueue.play();
     }
 
     @Override
