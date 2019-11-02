@@ -6,7 +6,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
-public abstract class IHomeViewModel extends AndroidViewModel {
+import com.vbarjovanu.workouttimer.ui.generic.viewmodels.ISynchronizable;
+
+public abstract class IHomeViewModel extends AndroidViewModel implements ISynchronizable {
 
     IHomeViewModel(@NonNull Application application) {
         super(application);

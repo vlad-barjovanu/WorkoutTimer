@@ -16,4 +16,6 @@ public interface WorkoutTrainingFragmentClickListners {
     void onNextWorkoutItemClick(View view);
 
     void onPreviousWorkoutItemClick(View view);
+
+    void onDurationClick(View view);
 }

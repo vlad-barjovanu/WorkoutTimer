@@ -44,6 +44,7 @@
     <string name="cool_down">Cool down</string>
     <string name="cool_down_duration">Cool down duration</string>
     <string name="edit_workout">Edit workout</string>
+    <string name="message_no_userprofiles_are_defined">No user profiles are defined yet. Add one to begin with!</string>
     <string name="message_no_workouts_are_defined">No workouts are defined yet. Add one to begin with!</string>
     <string name="message_pick_a_color">Choose a color</string>
     <string name="select">Select</string>
@@ -65,5 +66,7 @@
     <string name="next_workout_item">Next workout item</string>
     <string name="sound">Sound</string>
     <string name="vibrate">Vibrate</string>
+    <string name="message_workout_training_fragment_duration">+ %d</string>
+    <string name="message_workout_training_fragment_remaining_duration">- %d</string>
 
 </resources>

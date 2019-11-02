@@ -1,34 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.vbarjovanu.workouttimer.ui.workouts.list.WorkoutsFragment">
 
-    <TextView
-        android:id="@+id/text_workouts_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <data>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview_workouts"
+        <import type="com.vbarjovanu.workouttimer.helpers.converters.VisibilityBooleanConverter" />
+
+        <import type="com.vbarjovanu.workouttimer.ui.workouts.list.WorkoutsRecyclerViewAdapter" />
+
+        <import type="androidx.recyclerview.widget.RecyclerView.LayoutManager" />
+
+        <import type="com.vbarjovanu.workouttimer.business.models.workouts.WorkoutsList" />
+
+        <variable
+            name="workoutsList"
+            type="WorkoutsList" />
+
+        <variable
+            name="recyclerViewAdapter"
+            type="WorkoutsRecyclerViewAdapter" />
+
+        <variable
+            name="layoutManager"
+            type="LayoutManager" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/text_workouts_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:text="@string/message_no_workouts_are_defined"
+            android:visibility="@{VisibilityBooleanConverter.booleanToVisibility(workoutsList.size()==0)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_workouts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:scrollbars="vertical"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:visibility="@{VisibilityBooleanConverter.booleanToVisibility(workoutsList.size()>0)}"
+            app:adapter="@{recyclerViewAdapter}"
+            app:data="@{workoutsList}"
+            app:hasFixedSize="@{true}"
+            app:layoutManager="@{layoutManager}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

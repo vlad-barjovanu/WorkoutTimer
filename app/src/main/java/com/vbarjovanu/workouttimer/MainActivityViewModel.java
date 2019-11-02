@@ -1,5 +1,7 @@
 package com.vbarjovanu.workouttimer;
 
+import android.os.AsyncTask;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
@@ -9,7 +11,6 @@ import com.vbarjovanu.workouttimer.business.services.userprofiles.IUserProfilesS
 import com.vbarjovanu.workouttimer.session.IApplicationSession;
 import com.vbarjovanu.workouttimer.ui.generic.events.Event;
 import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
-import com.vbarjovanu.workouttimer.ui.generic.viewmodels.ISynchronizable;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -28,81 +29,9 @@ public class MainActivityViewModel extends IMainActivityViewModel {
         this.model = new MutableLiveData<>(new MainActivityModel());
     }
 
-    private UserProfile loadLastUserProfile() {
-        String userProfileId;
-        UserProfile userProfile = null;
-        userProfileId = this.applicationSession.getUserProfileId();
-        if (userProfileId != null) {
-            userProfile = this.userProfilesService.loadModel(userProfileId);
-        }
-        return userProfile;
-    }
-
-    private UserProfile createDefaultUserProfile() {
-        UserProfile userProfile = null;
-        try {
-            userProfile = this.userProfilesService.createDefaultModel();
-            this.userProfilesService.saveModel(userProfile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return userProfile;
-    }
-
-    /**
-     * Sets the user profile id in application session
-     *
-     * @param userProfile user profile
-     */
-    private void setUserProfileInSession(UserProfile userProfile) {
-        if (userProfile != null) {
-            this.applicationSession.setUserProfileId(userProfile.getId());
-        }
-    }
-
     @Override
     void initUserProfile(boolean navigateHome) {
-        UserProfile userProfile;
-        UserProfilesList userProfilesList;
-        //noinspection ConstantConditions
-        if (!this.model.getValue().isUserProfileInitialised()) {
-            userProfile = this.loadLastUserProfile();
-            if (userProfile == null) {
-                //if there is no user profile there are 2 options
-                userProfilesList = this.userProfilesService.loadModels();
-                switch (userProfilesList.size()) {
-                    case 0:
-                        //if it doesn't exist users profiles we create a default one
-                        userProfile = this.createDefaultUserProfile();
-                        if (userProfile != null) {
-                            this.setUserProfileInSession(userProfile);
-                            if (navigateHome) {
-                                this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_HOME)));
-                            }
-                        } else {
-                            this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.EXIT)));
-                        }
-                        break;
-                    case 1:
-                        this.setUserProfileInSession(userProfilesList.get(0));
-                        if (navigateHome) {
-                            this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_HOME)));
-                        }
-                        break;
-                    default:
-                        //if it exists users profiles, we redirect the user to choose one from
-                        this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_USERPROFILES)));
-                        break;
-                }
-            } else {
-                if (navigateHome) {
-                    this.action.setValue(new EventContent<>(new MainActivityActionData(MainActivityAction.GOTO_HOME)));
-                }
-            }
-            this.model.getValue().setUserProfileInitialised(true);
-            this.model.setValue(this.model.getValue());
-        }
-        this.decreaseCountDownLatch();
+        new MainActivityViewModel.LoadAsyncTask(this, this.applicationSession, this.userProfilesService).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, navigateHome);
     }
 
     @Override
@@ -166,4 +95,113 @@ public class MainActivityViewModel extends IMainActivityViewModel {
         }
     }
 
+    static class LoadAsyncTask extends AsyncTask<Object, Void, Object[]> {
+        @NonNull
+        private final MainActivityViewModel viewModel;
+        @NonNull
+        private final IApplicationSession applicationSession;
+        @NonNull
+        private final IUserProfilesService userProfilesService;
+
+        LoadAsyncTask(@NonNull MainActivityViewModel viewModel, @NonNull IApplicationSession applicationSession, @NonNull IUserProfilesService userProfilesService) {
+            this.viewModel = viewModel;
+            this.applicationSession = applicationSession;
+            this.userProfilesService = userProfilesService;
+        }
+
+        private UserProfile loadUserProfileFromSession() {
+            String userProfileId;
+            UserProfile userProfile = null;
+            userProfileId = this.applicationSession.getUserProfileId();
+            if (userProfileId != null) {
+                userProfile = this.userProfilesService.loadModel(userProfileId);
+            }
+            return userProfile;
+        }
+
+        private UserProfile createDefaultUserProfile() {
+            UserProfile userProfile = null;
+            try {
+                userProfile = this.userProfilesService.createDefaultModel();
+                this.userProfilesService.saveModel(userProfile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return userProfile;
+        }
+
+        /**
+         * Sets the user profile id in application session
+         *
+         * @param userProfile user profile
+         */
+        private void setUserProfileInSession(UserProfile userProfile) {
+            if (userProfile != null) {
+                this.applicationSession.setUserProfileId(userProfile.getId());
+            }
+        }
+
+        @Override
+        protected Object[] doInBackground(Object... objects) {
+            UserProfile userProfile;
+            UserProfilesList userProfilesList;
+            boolean allowNavigateHome;
+            MainActivityAction action;
+
+            /*
+             * when a user profile ID is stored in session and the user profile exists, simply redirect to HOME without taking other actions
+             * when no user profile ID is stored in session or an ID of a non-existing profile is stored, than:
+             * - if there are no user profiles available, create a default one, register it in session and navigate HOME
+             * - if there is one user profile available, register it in session and navigate HOME
+             * - if there is more than one user profile available, navigate to user profiles
+             */
+
+            allowNavigateHome = (boolean) objects[0];
+            userProfile = this.loadUserProfileFromSession();
+            if (userProfile != null) {
+                action = MainActivityAction.GOTO_HOME;
+                userProfile = null; //set the user profile to null, so it's not stored again in session (it's already there)
+            } else {
+                userProfilesList = this.userProfilesService.loadModels();
+                switch (userProfilesList.size()) {
+                    case 0:
+                        userProfile = this.createDefaultUserProfile();
+                        action = (userProfile == null ? MainActivityAction.EXIT : MainActivityAction.GOTO_HOME); //if creating a default user profile failed, than exit the app
+                        break;
+                    case 1:
+                        userProfile = userProfilesList.get(0);
+                        action = MainActivityAction.GOTO_HOME;
+                        break;
+                    default:
+                        userProfile = null;
+                        action = MainActivityAction.GOTO_USERPROFILES;
+                        break;
+                }
+            }
+            if (!allowNavigateHome && action == MainActivityAction.GOTO_HOME) {
+                //if navigate home is not allowed
+                action = null;
+            }
+            return new Object[]{userProfile, action};
+        }
+
+        @Override
+        protected void onPostExecute(Object[] objects) {
+            UserProfile userProfile;
+            MainActivityAction action;
+
+            userProfile = (UserProfile) objects[0];
+            action = (MainActivityAction) objects[1];
+
+            this.setUserProfileInSession(userProfile);
+            if (action != null) {
+                this.viewModel.action.postValue(new EventContent<>(new MainActivityActionData(action)));
+            }
+            if (this.viewModel.model.getValue() != null) {
+                this.viewModel.model.getValue().setUserProfileInitialised(true);
+                this.viewModel.model.postValue(this.viewModel.model.getValue());
+            }
+            this.viewModel.decreaseCountDownLatch();
+        }
+    }
 }

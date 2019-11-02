@@ -32,9 +32,13 @@ public abstract class IWorkoutTrainingViewModel extends ViewModel implements ISy
 
     abstract void previousWorkoutTrainingItem();
 
+    abstract void gotoWorkoutTrainingItem(int index);
+
     abstract void toggleLock();
 
     public abstract void toggleSound();
 
     public abstract void toggleVibrate();
+
+    public abstract void toggleDisplayRemainingDuration();
 }

@@ -1,32 +1,27 @@
 package com.vbarjovanu.workouttimer.ui.workouts.training.models;
 
-import android.graphics.Color;
-
 import androidx.annotation.NonNull;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.databinding.Observable;
 
-import com.vbarjovanu.workouttimer.BR;
 import com.vbarjovanu.workouttimer.business.models.workouts.Workout;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class WorkoutTrainingModel extends BaseObservable implements Serializable {
 
     @NonNull
     private final Workout workout;
     private final boolean includeLastRest;
-    private List<WorkoutTrainingItemModel> workoutTrainingItems;
+    private WorkoutTrainingItemModelsList workoutTrainingItems;
     private int currentIndex;
     private boolean inTraining;
     transient private Observable.OnPropertyChangedCallback onPropertyChangedCallback;
     private boolean locked;
     private boolean soundOn;
     private boolean vibrateOn;
+    private boolean displayRemainingDuration;
 
     /**
      * @param workout         workout to train
@@ -41,6 +36,7 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
         this.locked = false;
         this.setSoundOn(true);
         this.setVibrateOn(true);
+        this.setDisplayRemainingDuration(!workout.isIncreaseDuration());
     }
 
     public void close() {
@@ -66,22 +62,25 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
 
     private int computeInitialDurationFromIndex(int index) {
         int d = 0;
-        for (int i = index; i < this.workoutTrainingItems.size(); i++) {
-            d += this.workoutTrainingItems.get(i).getInitialDuration();
+        if (index >= 0 && index < this.workoutTrainingItems.size()) {
+            for (int i = index; i < this.workoutTrainingItems.size(); i++) {
+                d += this.workoutTrainingItems.get(i).getInitialDuration();
+            }
         }
         return d;
     }
 
     private int computeRemainingDurationFromIndex(int index) {
         int d = 0;
-        for (int i = index; i < this.workoutTrainingItems.size(); i++) {
-            d += this.workoutTrainingItems.get(i).getRemainingDuration();
+        if (index >= 0 && index < this.workoutTrainingItems.size()) {
+            for (int i = index; i < this.workoutTrainingItems.size(); i++) {
+                d += this.workoutTrainingItems.get(i).getRemainingDuration();
+            }
         }
         return d;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public List<WorkoutTrainingItemModel> getWorkoutTrainingItems() {
+    public WorkoutTrainingItemModelsList getWorkoutTrainingItems() {
         return workoutTrainingItems;
     }
 
@@ -110,6 +109,11 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
         return vibrateOn;
     }
 
+    @Bindable
+    public boolean isDisplayRemainingDuration() {
+        return displayRemainingDuration;
+    }
+
     @SuppressWarnings("UnusedReturnValue")
     public WorkoutTrainingModel setInTraining(boolean inTraining) {
         this.inTraining = inTraining;
@@ -132,6 +136,11 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
     public WorkoutTrainingModel setVibrateOn(boolean vibrateOn) {
         this.vibrateOn = vibrateOn;
         this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.vibrateOn);
+        return this;
+    }
+
+    public WorkoutTrainingModel setDisplayRemainingDuration(boolean displayRemainingDuration) {
+        this.displayRemainingDuration = displayRemainingDuration;
         return this;
     }
 
@@ -183,7 +192,6 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
      * @param index training item index
      * @return true if moved to desired training item
      */
-    @SuppressWarnings("WeakerAccess")
     public boolean goToTrainingItem(int index) {
         boolean result = false;
         int count = 0;
@@ -212,7 +220,6 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
         int coolDownDuration;
         String workDescription, restDescription;
         int index, cycleIndex, setIndex;
-        boolean increaseDuration;
 
         prepareDuration = (this.workout.getPrepareDuration() == null) ? 0 : this.workout.getPrepareDuration();
         cyclesCount = (this.workout.getCyclesCount() == null) ? 0 : this.workout.getCyclesCount();
@@ -223,29 +230,28 @@ public class WorkoutTrainingModel extends BaseObservable implements Serializable
         setsCount = (this.workout.getSetsCount() == null) ? 0 : this.workout.getSetsCount();
         restBetweenSetsDuration = (this.workout.getRestBetweenSetsDuration() == null) ? 0 : this.workout.getRestBetweenSetsDuration();
         coolDownDuration = (this.workout.getCoolDownDuration() == null) ? 0 : this.workout.getCoolDownDuration();
-        increaseDuration = this.workout.isIncreaseDuration();
 
-        index = 1;
+        index = 0;
         setIndex = 1;
         cycleIndex = 1;
-        this.workoutTrainingItems = new ArrayList<>();
-        this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.PREPARE, prepareDuration, increaseDuration, index, cycleIndex, setIndex));
+        this.workoutTrainingItems = new WorkoutTrainingItemModelsList();
+        this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.PREPARE, prepareDuration, index++, cycleIndex, setIndex));
         for (setIndex = 1; setIndex <= setsCount; setIndex++) {
             for (cycleIndex = 1; cycleIndex <= cyclesCount; cycleIndex++) {
                 if (workDuration > 0) {
-                    this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.WORK, workDuration, increaseDuration, index++, cycleIndex, setIndex, workDescription));
+                    this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.WORK, workDuration, index++, cycleIndex, setIndex, workDescription));
                 }
                 if (restDuration > 0 && (cycleIndex < cyclesCount || this.includeLastRest)) {
-                    this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.REST, restDuration, increaseDuration, index++, cycleIndex, setIndex, restDescription));
+                    this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.REST, restDuration, index++, cycleIndex, setIndex, restDescription));
                 }
             }
             cycleIndex--;
             if (restBetweenSetsDuration > 0 && (setIndex < setsCount || this.includeLastRest)) {
-                this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.SET_REST, restBetweenSetsDuration, increaseDuration, index++, cycleIndex, setIndex));
+                this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.SET_REST, restBetweenSetsDuration, index++, cycleIndex, setIndex));
             }
         }
         setIndex--;
-        this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.COOL_DOWN, coolDownDuration, increaseDuration, index, cycleIndex, setIndex));
+        this.workoutTrainingItems.add(new WorkoutTrainingItemModel(WorkoutTrainingItemType.COOL_DOWN, coolDownDuration, index, cycleIndex, setIndex));
         this.addObserverWorkoutTrainingItemsChanges();
     }
 

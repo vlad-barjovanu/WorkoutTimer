@@ -19,11 +19,12 @@ import com.vbarjovanu.workouttimer.ui.workouts.training.logic.IWorkoutTrainingTi
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.IWorkoutTrainingItemColorProvider;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemColorProvider;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemModel;
-import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingItemType;
 import com.vbarjovanu.workouttimer.ui.workouts.training.models.WorkoutTrainingModel;
 
-import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
     private IWorkoutTrainingItemColorProvider workoutTrainingItemColorProvider;
@@ -105,8 +106,7 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
         //TODO set action GOTO workouts
     }
 
-    @Override
-    void nextWorkoutTrainingItem() {
+    private void switchWorkoutTrainingItem(java.util.function.Consumer<WorkoutTrainingModel> func) {
         boolean isInTraining;
         WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
         if (model != null && !model.isLocked()) {
@@ -114,9 +114,7 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
             if (isInTraining) {
                 this.workoutTrainingTimer.stop();
             }
-            if (model.nextTrainingItem()) {
-                model.getCurrentWorkoutTrainingItem().resetDuration();
-            }
+            func.accept(model);
             if (isInTraining) {
                 this.workoutTrainingTimer.start();
             }
@@ -124,45 +122,68 @@ public class WorkoutTrainingViewModel extends IWorkoutTrainingViewModel {
     }
 
     @Override
-    void previousWorkoutTrainingItem() {
-        boolean isInTraining;
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && !model.isLocked()) {
-            isInTraining = model.isInTraining();
-            if (isInTraining) {
-                this.workoutTrainingTimer.stop();
+    void nextWorkoutTrainingItem() {
+        this.switchWorkoutTrainingItem((model -> {
+            model.getCurrentWorkoutTrainingItem().setDurationComplete();
+            if (model.nextTrainingItem()) {
+                model.getCurrentWorkoutTrainingItem().resetDuration();
             }
+        }));
+    }
+
+    @Override
+    void previousWorkoutTrainingItem() {
+        this.switchWorkoutTrainingItem((model -> {
+            model.getCurrentWorkoutTrainingItem().resetDuration();
             if (model.previousTrainingItem()) {
                 model.getCurrentWorkoutTrainingItem().resetDuration();
             }
-            if (isInTraining) {
-                this.workoutTrainingTimer.start();
+        }));
+    }
+
+    @Override
+    void gotoWorkoutTrainingItem(int index) {
+        this.switchWorkoutTrainingItem((model -> {
+            if (index >= 0 && index < model.getWorkoutTrainingItems().size()) {
+                if (index > model.getCurrentWorkoutTrainingItem().getTotalIndex()) {
+                    model.getWorkoutTrainingItems().subList(model.getCurrentWorkoutTrainingItem().getTotalIndex(), index).forEach(WorkoutTrainingItemModel::setDurationComplete);
+                }
+                if (index < model.getCurrentWorkoutTrainingItem().getTotalIndex()) {
+                    model.getWorkoutTrainingItems().subList(index + 1, model.getCurrentWorkoutTrainingItem().getTotalIndex() + 1).forEach(WorkoutTrainingItemModel::resetDuration);
+                }
+
+                if (model.goToTrainingItem(index)) {
+                    model.getCurrentWorkoutTrainingItem().resetDuration();
+                }
             }
+        }));
+    }
+
+    private void toggle(Function<WorkoutTrainingModel, Boolean> condition, java.util.function.BiFunction<WorkoutTrainingModel, Boolean, WorkoutTrainingModel> setter, Function<WorkoutTrainingModel, Boolean> getter) {
+        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
+        if (model != null && condition.apply(model)) {
+            setter.apply(model, !getter.apply(model));
         }
     }
 
     @Override
     void toggleLock() {
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && model.isInTraining()) {
-            model.setLocked(!model.isLocked());
-        }
+        this.toggle(WorkoutTrainingModel::isInTraining, WorkoutTrainingModel::setLocked, WorkoutTrainingModel::isLocked);
     }
 
     @Override
     public void toggleSound() {
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && !model.isLocked()) {
-            model.setSoundOn(!model.isSoundOn());
-        }
+        this.toggle(model -> !model.isLocked(), WorkoutTrainingModel::setSoundOn, WorkoutTrainingModel::isSoundOn);
     }
 
     @Override
     public void toggleVibrate() {
-        WorkoutTrainingModel model = this.workoutTrainingModel.getValue();
-        if (model != null && !model.isLocked()) {
-            model.setVibrateOn(!model.isVibrateOn());
-        }
+        this.toggle(model -> !model.isLocked(), WorkoutTrainingModel::setVibrateOn, WorkoutTrainingModel::isVibrateOn);
+    }
+
+    @Override
+    public void toggleDisplayRemainingDuration() {
+        this.toggle(model -> !model.isLocked(), WorkoutTrainingModel::setDisplayRemainingDuration, WorkoutTrainingModel::isDisplayRemainingDuration);
     }
 
     @Override

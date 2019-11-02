@@ -20,6 +20,10 @@
 
         <import type="com.vbarjovanu.workouttimer.ui.workouts.training.models.IWorkoutTrainingItemColorProvider" />
 
+        <import type="com.vbarjovanu.workouttimer.ui.workouts.training.WorkoutItemsRecyclerViewAdapter" />
+
+        <import type="androidx.recyclerview.widget.RecyclerView.LayoutManager"/>
+
         <variable
             name="workoutTrainingModel"
             type="WorkoutTrainingModel" />
@@ -31,6 +35,15 @@
         <variable
             name="clickListners"
             type="WorkoutTrainingFragmentClickListners" />
+
+        <variable
+            name="recyclerViewAdapter"
+            type="WorkoutItemsRecyclerViewAdapter" />
+
+        <variable
+            name="layoutManager"
+            type="LayoutManager" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -133,13 +146,29 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="@string/hint_duration"
-            android:text="@{StringIntegerConverter.integerToString(workoutTrainingModel.currentWorkoutTrainingItem.duration)}"
+            android:onClick="@{(v)->clickListners.onDurationClick(v)}"
+            android:text="@{(workoutTrainingModel.displayRemainingDuration ? @string/message_workout_training_fragment_remaining_duration(workoutTrainingModel.currentWorkoutTrainingItem.remainingDuration) : @string/message_workout_training_fragment_duration(workoutTrainingModel.currentWorkoutTrainingItem.duration))}"
             android:textAlignment="center"
             android:textSize="120sp"
             app:layout_constraintEnd_toEndOf="@id/fragment_workout_training_textview_current_item_type"
             app:layout_constraintStart_toStartOf="@id/fragment_workout_training_textview_current_item_type"
             app:layout_constraintTop_toBottomOf="@id/fragment_workout_training_textview_current_item_type" />
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fragment_workout_training_recyclerview_workout_training_items"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scrollbars="vertical"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            app:adapter="@{recyclerViewAdapter}"
+            app:data="@{workoutTrainingModel.workoutTrainingItems}"
+            app:layoutManager="@{layoutManager}"
+            app:hasFixedSize="@{true}"
+            app:layout_constraintBottom_toTopOf="@+id/fragment_workout_training_textview_cycle_index"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_workout_training_textview_current_item_duration" />
 
         <ImageButton
             android:id="@+id/fragment_workout_training_button_previous_item"

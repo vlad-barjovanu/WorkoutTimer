@@ -39,12 +39,7 @@ public abstract class RecyclerViewAdapter<T extends IModel, Z extends Enum> exte
     @Override
     public void onBindViewHolder(@NonNull final RecyclerViewAdapter.ViewHolder holder, final int position) {
         ItemModel itemModel = this.createItemModel(this.getModelForPosition(position));
-        itemModel.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onClick(ItemModel itemModel1, View view) {
-                onItemClick(view, itemModel1, holder, position);
-            }
-        });
+        itemModel.setOnItemClickListener((itemModel1, view) -> onItemClick(view, itemModel1, holder, position));
         holder.bind(itemModel);
     }
 
@@ -61,6 +56,14 @@ public abstract class RecyclerViewAdapter<T extends IModel, Z extends Enum> exte
     @Override
     public int getItemCount() {
         return this.modelsList.size();
+    }
+
+    public RecyclerViewAdapter<T, Z> setModelsList(ModelsList<T> modelsList) {
+        if (modelsList != null) {
+            this.modelsList = modelsList;
+            this.notifyDataSetChanged();
+        }
+        return this;
     }
 
     public SingleLiveEvent<RecyclerViewItemActionData<Z>> getItemAction() {
