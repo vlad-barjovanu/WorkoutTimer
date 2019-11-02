@@ -83,11 +83,20 @@ public class WorkoutTrainingTimer implements IWorkoutTrainingTimer {
         if (this.workoutTrainingModel.isInTraining()) {
             this.workoutTrainingModel.getCurrentWorkoutTrainingItem().alterDuration();
             if (this.workoutTrainingModel.getCurrentWorkoutTrainingItem().isComplete()) {
-                if (this.workoutTrainingModel.nextTrainingItem()) {
-                    this.workoutTrainingModel.getCurrentWorkoutTrainingItem().resetDuration();//to start fresh
-                } else {
-                    this.stop();
-                }
+
+                do {
+                    //advance to next item, until there's a non-empty (zero duration) item or we have reached the last item
+                    if (this.workoutTrainingModel.nextTrainingItem()) {
+                        this.workoutTrainingModel.getCurrentWorkoutTrainingItem().resetDuration();//to start fresh
+                        if (!this.workoutTrainingModel.getCurrentWorkoutTrainingItem().isComplete()) {
+                            break;
+                        }
+                    } else {
+                        this.stop();
+                        break;
+                    }
+                } while (true);
+
             }
         }
     }
