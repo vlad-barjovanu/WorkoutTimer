@@ -1,31 +1,26 @@
 package com.vbarjovanu.workouttimer.ui.userprofiles.list;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.vbarjovanu.workouttimer.IMainActivityViewModel;
 import com.vbarjovanu.workouttimer.MainActivityActionData;
 import com.vbarjovanu.workouttimer.R;
 import com.vbarjovanu.workouttimer.business.models.userprofiles.UserProfilesList;
+import com.vbarjovanu.workouttimer.databinding.FragmentUserprofilesBinding;
 import com.vbarjovanu.workouttimer.ui.generic.events.EventContent;
 import com.vbarjovanu.workouttimer.ui.generic.recyclerview.RecyclerViewItemActionData;
 import com.vbarjovanu.workouttimer.ui.generic.viewmodels.CustomViewModelFactory;
-import com.vbarjovanu.workouttimer.ui.userprofiles.images.UserProfilesImagesService;
 
 import java.util.Objects;
 
@@ -33,26 +28,45 @@ public class UserProfilesFragment extends Fragment {
 
     private IUserProfilesViewModel userProfilesViewModel;
     private IMainActivityViewModel mainActivityViewModel;
-    private RecyclerView recyclerView;
+    private FragmentUserprofilesBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Objects.requireNonNull(this.getActivity(), "Activity must not be null");
 
         View root = inflater.inflate(R.layout.fragment_userprofiles, container, false);
-        final TextView textView = root.findViewById(R.id.text_userprofiles);
-        textView.setText(getString(R.string.menu_userprofiles));
-        this.recyclerView = root.findViewById(R.id.recyclerview_userprofiles);
-        this.recyclerView.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this.getContext());
-        this.recyclerView.setLayoutManager(layoutManager);
-
         this.userProfilesViewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IUserProfilesViewModel.class);
         this.mainActivityViewModel = ViewModelProviders.of(this.getActivity(), CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IMainActivityViewModel.class);
+        this.binding = FragmentUserprofilesBinding.bind(root);
+        this.binding.setLayoutManager(new LinearLayoutManager(getContext()));
+        UserProfilesRecyclerViewAdapter adapter = new UserProfilesRecyclerViewAdapter(new UserProfilesList(), CustomViewModelFactory.getInstance(this.getActivity().getApplication()).getUserProfilesImagesService());
+        adapter.getItemAction().observe(this, this::onRecyclerViewItemAction);
+        this.binding.setRecyclerViewAdapter(adapter);
+
         this.userProfilesViewModel.getUserProfiles().observe(this, this::onUserProfilesChanged);
-        this.userProfilesViewModel.getActionData().observe(this, this::onUserProfilesFragmentAction);
+        this.userProfilesViewModel.getActionData().observe(this, this::onViewModelAction);
         this.mainActivityViewModel.getAction().observe(this, this::onMainActivityAction);
         return root;
+    }
+
+    @Override
+    public void onDestroyView() {
+        UserProfilesRecyclerViewAdapter adapter;
+
+        super.onDestroyView();
+        if (this.binding != null) {
+            adapter = this.binding.getRecyclerViewAdapter();
+            if (adapter != null) {
+                adapter.getItemAction().removeObserver(this::onRecyclerViewItemAction);
+            }
+        }
+        if (this.mainActivityViewModel != null) {
+            this.mainActivityViewModel.getAction().removeObserver(this::onMainActivityAction);
+        }
+        if (this.userProfilesViewModel != null) {
+            this.userProfilesViewModel.getUserProfiles().removeObserver(this::onUserProfilesChanged);
+            this.userProfilesViewModel.getActionData().removeObserver(this::onViewModelAction);
+        }
     }
 
     @Override
@@ -64,7 +78,7 @@ public class UserProfilesFragment extends Fragment {
         this.mainActivityViewModel.showSaveEntityButton(false);
     }
 
-    private void onUserProfilesFragmentAction(UserProfilesFragmentActionData actionData) {
+    private void onViewModelAction(UserProfilesFragmentActionData actionData) {
         Bundle args;
         Objects.requireNonNull(this.getActivity(), "Activity must not be null");
 
@@ -83,7 +97,7 @@ public class UserProfilesFragment extends Fragment {
         }
     }
 
-    private void onUserProfilesRecyclerViewAdapterItemAction(RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction> itemActionData) {
+    private void onRecyclerViewItemAction(RecyclerViewItemActionData<UserProfilesRecyclerViewItemAction> itemActionData) {
         switch (itemActionData.getAction()) {
             case USERPROFILE_EDIT:
                 this.userProfilesViewModel.editUserProfile(itemActionData.getId());
@@ -97,12 +111,7 @@ public class UserProfilesFragment extends Fragment {
     }
 
     private void onUserProfilesChanged(UserProfilesList userProfiles) {
-        UserProfilesRecyclerViewAdapter userProfilesRecyclerViewAdapter;
-        if (this.getActivity() != null) {
-            userProfilesRecyclerViewAdapter = new UserProfilesRecyclerViewAdapter(userProfiles, CustomViewModelFactory.getInstance(this.getActivity().getApplication()).getUserProfilesImagesService());
-            userProfilesRecyclerViewAdapter.getItemAction().observe(this, this::onUserProfilesRecyclerViewAdapterItemAction);
-            this.recyclerView.setAdapter(userProfilesRecyclerViewAdapter);
-        }
+        this.binding.setUserProfilesList(userProfiles);
     }
 
     private void onMainActivityAction(EventContent<MainActivityActionData> eventContent) {
