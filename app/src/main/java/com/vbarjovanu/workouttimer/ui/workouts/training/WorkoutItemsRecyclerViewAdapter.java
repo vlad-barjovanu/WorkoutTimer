@@ -35,7 +35,7 @@ public class WorkoutItemsRecyclerViewAdapter extends RecyclerViewAdapter<Workout
 
         title = String.format(locale, "%d. %s", model.getTotalIndex() + 1, model.getType());
         description = String.format(locale, "C%d S%d - %s", model.getCycleIndex(), model.getSetIndex(), model.getDescription());
-        return new ItemModel(model.getPrimaryKey(), title, description, android.R.color.transparent);
+        return new ItemModel(model.getPrimaryKey(), title, description, this.getItemBackgroundColor(), this.getItemTextColor());
     }
 
     @Override

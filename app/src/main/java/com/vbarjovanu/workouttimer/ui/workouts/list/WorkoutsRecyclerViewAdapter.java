@@ -19,7 +19,7 @@ public class WorkoutsRecyclerViewAdapter extends RecyclerViewAdapter<Workout, Wo
 
     @Override
     protected ItemModel createItemModel(Workout model) {
-        return new ItemModel(model.getId(), model.getName(), model.getDescription(), model.getColor());
+        return new ItemModel(model.getId(), model.getName(), model.getDescription(), model.getColor(), this.getItemTextColor());
     }
 
     @Override
@@ -34,12 +34,7 @@ public class WorkoutsRecyclerViewAdapter extends RecyclerViewAdapter<Workout, Wo
             case R.id.recyclerview_workouts_button_menu:
                 PopupMenu popup = new PopupMenu(view.getContext(), view);
                 popup.inflate(R.menu.workouts_options_menu);
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        return WorkoutsRecyclerViewAdapter.this.onMenuItemClick(item, itemModel);
-                    }
-                });
+                popup.setOnMenuItemClickListener(item -> WorkoutsRecyclerViewAdapter.this.onMenuItemClick(item, itemModel));
                 //displaying the popup
                 popup.show();
                 break;

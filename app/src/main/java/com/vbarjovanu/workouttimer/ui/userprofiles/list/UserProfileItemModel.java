@@ -9,8 +9,8 @@ import com.vbarjovanu.workouttimer.ui.generic.recyclerview.ItemModel;
 public class UserProfileItemModel extends ItemModel {
     private Bitmap userImage;
 
-    UserProfileItemModel(String id, String title, String description, int color, Bitmap userImage) {
-        super(id, title, description, color);
+    UserProfileItemModel(String id, String title, String description, int color, int textColor, Bitmap userImage) {
+        super(id, title, description, color, textColor);
         this.userImage = userImage;
     }
 

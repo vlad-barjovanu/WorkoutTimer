@@ -1,5 +1,6 @@
 package com.vbarjovanu.workouttimer.ui.userprofiles.list;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +41,7 @@ public class UserProfilesFragment extends Fragment {
         this.binding = FragmentUserprofilesBinding.bind(root);
         this.binding.setLayoutManager(new LinearLayoutManager(getContext()));
         UserProfilesRecyclerViewAdapter adapter = new UserProfilesRecyclerViewAdapter(new UserProfilesList(), CustomViewModelFactory.getInstance(this.getActivity().getApplication()).getUserProfilesImagesService());
+        adapter.setDefaultColors(this.getResources());
         adapter.getItemAction().observe(this, this::onRecyclerViewItemAction);
         this.binding.setRecyclerViewAdapter(adapter);
 

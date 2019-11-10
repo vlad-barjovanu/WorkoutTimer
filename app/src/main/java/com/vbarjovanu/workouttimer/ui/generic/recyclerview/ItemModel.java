@@ -12,13 +12,15 @@ public class ItemModel extends BaseObservable {
     private String title;
     private String description;
     private int color;
+    private int textColor;
     private OnItemClickListener onItemClickListener;
 
-    public ItemModel(String id, String title, String description, int color) {
+    public ItemModel(String id, String title, String description, int color, int textColor) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.color = color;
+        this.textColor = textColor;
         this.onItemClickListener = null;
     }
 
@@ -37,9 +39,36 @@ public class ItemModel extends BaseObservable {
         return description;
     }
 
+    /**
+     * The background item color
+     *
+     * @return color
+     */
     @Bindable
     public int getColor() {
         return color;
+    }
+
+    /**
+     * The text item color
+     *
+     * @return color
+     */
+    @Bindable
+    public int getTextColor() {
+        return textColor;
+    }
+
+    public ItemModel setColor(int color) {
+        this.color = color;
+        this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.color);
+        return this;
+    }
+
+    public ItemModel setTextColor(int textColor) {
+        this.textColor = textColor;
+        this.notifyPropertyChanged(com.vbarjovanu.workouttimer.BR.textColor);
+        return this;
     }
 
     @SuppressWarnings("WeakerAccess")

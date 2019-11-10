@@ -43,6 +43,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:text="@{item.title}"
+                    android:textColor="@{item.textColor}"
                     android:textSize="30sp"
                     tools:ignore="RelativeOverlap" />
 
@@ -61,7 +62,8 @@
                     android:layout_height="50dp"
                     android:layout_alignParentEnd="true"
                     android:onClick="@{(v)->item.onClick(item, v)}"
-                    android:text="@string/three_vertical_dots" />
+                    android:text="@string/three_vertical_dots"
+                    android:textColor="@{item.textColor}" />
             </RelativeLayout>
 
             <TextView
@@ -69,7 +71,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/recyclerview_workouts_first_row"
-                android:text="@{item.description}" />
+                android:text="@{item.description}"
+                android:textColor="@{item.textColor}" />
 
         </RelativeLayout>
     </androidx.cardview.widget.CardView>

@@ -39,6 +39,7 @@
                 android:layout_weight=".3"
                 android:hint="@string/title"
                 android:text="@{item.title}"
+                android:textColor="@{item.textColor}"
                 android:textSize="15sp"
                 tools:ignore="RelativeOverlap" />
 
@@ -49,6 +50,7 @@
                 android:layout_weight=".7"
                 android:hint="@string/description"
                 android:text="@{item.description}"
+                android:textColor="@{item.textColor}"
                 android:textSize="15sp" />
 
         </LinearLayout>

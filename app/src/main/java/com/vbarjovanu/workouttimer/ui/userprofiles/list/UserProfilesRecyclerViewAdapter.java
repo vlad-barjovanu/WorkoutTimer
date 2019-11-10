@@ -31,7 +31,7 @@ public class UserProfilesRecyclerViewAdapter extends RecyclerViewAdapter<UserPro
     protected ItemModel createItemModel(UserProfile model) {
         Bitmap userImage = this.userProfilesImagesService.getUserImage(model);
 
-        return new UserProfileItemModel(model.getId(), model.getName(), model.getDescription(), android.R.color.white, userImage);
+        return new UserProfileItemModel(model.getId(), model.getName(), model.getDescription(), this.getItemBackgroundColor(), this.getItemTextColor(), userImage);
     }
 
     /**
@@ -50,12 +50,7 @@ public class UserProfilesRecyclerViewAdapter extends RecyclerViewAdapter<UserPro
             case R.id.recyclerview_userprofiles_button_menu:
                 PopupMenu popup = new PopupMenu(view.getContext(), view);
                 popup.inflate(R.menu.userprofiles_options_menu);
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        return UserProfilesRecyclerViewAdapter.this.onMenuItemClick(item, itemModel);
-                    }
-                });
+                popup.setOnMenuItemClickListener(item -> UserProfilesRecyclerViewAdapter.this.onMenuItemClick(item, itemModel));
                 //displaying the popup
                 popup.show();
                 break;

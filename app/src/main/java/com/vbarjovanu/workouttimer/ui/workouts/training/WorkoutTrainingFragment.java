@@ -37,7 +37,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = null;
-        WorkoutItemsRecyclerViewAdapter workoutItemsAdapter;
+        WorkoutItemsRecyclerViewAdapter adapter;
 
         if (this.getActivity() != null) {
             this.viewModel = ViewModelProviders.of(this, CustomViewModelFactory.getInstance(this.getActivity().getApplication())).get(IWorkoutTrainingViewModel.class);
@@ -51,9 +51,10 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
             this.binding = FragmentWorkoutTrainingBinding.bind(root);
             this.binding.setClickListners(this);
             this.binding.setWorkoutTrainingItemColorProvider(this.viewModel.getWorkoutTrainingItemColorProvider());
-            workoutItemsAdapter = new WorkoutItemsRecyclerViewAdapter(new WorkoutTrainingItemModelsList());
-            workoutItemsAdapter.getItemAction().observe(this, this::onRecyclerViewItemAction);
-            this.binding.setRecyclerViewAdapter(workoutItemsAdapter);
+            adapter = new WorkoutItemsRecyclerViewAdapter(new WorkoutTrainingItemModelsList());
+            adapter.setDefaultColors(this.getResources());
+            adapter.getItemAction().observe(this, this::onRecyclerViewItemAction);
+            this.binding.setRecyclerViewAdapter(adapter);
             this.binding.setLayoutManager(new LinearLayoutManager(getContext()));
         }
         return root;
@@ -118,6 +119,8 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     private void onWorkoutChanged(WorkoutTrainingModel workoutTrainingModel) {
         this.binding.setWorkoutTrainingModel(workoutTrainingModel);
         this.observerWorkoutTrainingModelPropertiesChanges(workoutTrainingModel);
+        this.scrollCurrentTrainingItemIntoView(workoutTrainingModel);
+        this.selectCurrentTrainingItem(workoutTrainingModel);
     }
 
     /**
@@ -133,7 +136,8 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
                     WorkoutTrainingFragment.this.getActivity().runOnUiThread(() -> {
                         switch (propertyId) {
                             case com.vbarjovanu.workouttimer.BR.currentWorkoutTrainingItem:
-                                WorkoutTrainingFragment.this.scrollTrainingItemIntoView(workoutTrainingModel);
+                                WorkoutTrainingFragment.this.scrollCurrentTrainingItemIntoView(workoutTrainingModel);
+                                WorkoutTrainingFragment.this.selectCurrentTrainingItem(workoutTrainingModel);
                                 break;
                             case com.vbarjovanu.workouttimer.BR.inTraining:
                                 WorkoutTrainingFragment.this.keepScreenOn(workoutTrainingModel.isInTraining());
@@ -164,12 +168,24 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
      *
      * @param workoutTrainingModel workout training model
      */
-    private void scrollTrainingItemIntoView(WorkoutTrainingModel workoutTrainingModel) {
+    private void scrollCurrentTrainingItemIntoView(WorkoutTrainingModel workoutTrainingModel) {
         LinearLayoutManager layoutManager;
-        layoutManager = ((LinearLayoutManager) WorkoutTrainingFragment.this.binding.getLayoutManager());
+        layoutManager = ((LinearLayoutManager) this.binding.getLayoutManager());
         if (layoutManager != null) {
             layoutManager.scrollToPositionWithOffset(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex(), 0);
-            //TODO: add selection support to recyclerview
+        }
+    }
+
+    /**
+     * Brings the current training item into the visible area of the recycler view
+     *
+     * @param workoutTrainingModel workout training model
+     */
+    private void selectCurrentTrainingItem(WorkoutTrainingModel workoutTrainingModel) {
+        WorkoutItemsRecyclerViewAdapter adapter;
+        adapter = this.binding.getRecyclerViewAdapter();
+        if (adapter != null) {
+            adapter.setSelectedItemPosition(workoutTrainingModel.getCurrentWorkoutTrainingItem().getTotalIndex());
         }
     }
 
@@ -217,7 +233,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
      * Plays a certain sound resource
      *
      * @param soundIds array of IDs of the sound resources to be played
-     * @param speed the speed at which sound will be played
+     * @param speed    the speed at which sound will be played
      */
     private void playSound(List<Integer> soundIds, float speed) {
         MediaPlayerQueue mediaPlayerQueue;

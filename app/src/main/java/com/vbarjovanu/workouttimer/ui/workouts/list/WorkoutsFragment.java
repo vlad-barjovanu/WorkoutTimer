@@ -2,6 +2,7 @@ package com.vbarjovanu.workouttimer.ui.workouts.list;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,9 +62,10 @@ public class WorkoutsFragment extends Fragment {
 
             this.binding = FragmentWorkoutsBinding.bind(root);
             this.binding.setLayoutManager(new LinearLayoutManager(getContext()));
-            WorkoutsRecyclerViewAdapter workoutsAdapter = new WorkoutsRecyclerViewAdapter(new WorkoutsList());
-            workoutsAdapter.getItemAction().observe(this, this::onRecyclerViewItemAction);
-            this.binding.setRecyclerViewAdapter(workoutsAdapter);
+            WorkoutsRecyclerViewAdapter adapter = new WorkoutsRecyclerViewAdapter(new WorkoutsList());
+            adapter.setDefaultColors(this.getResources());
+            adapter.getItemAction().observe(this, this::onRecyclerViewItemAction);
+            this.binding.setRecyclerViewAdapter(adapter);
 
             this.workoutsViewModel.getWorkouts().observe(this, this::onWorkoutsListChanged);
             this.workoutsViewModel.getActionData().observe(this, this::onViewModelAction);
