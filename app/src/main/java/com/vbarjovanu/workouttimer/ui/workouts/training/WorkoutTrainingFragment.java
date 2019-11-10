@@ -1,6 +1,5 @@
 package com.vbarjovanu.workouttimer.ui.workouts.training;
 
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -183,6 +182,7 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
     private <T extends WorkoutTrainingActionData> void onActionChanged(T actionData) {
         DurationChangeActionData durationChangeActionData;
         List<Integer> soundIds = new ArrayList<>();
+        float speed = 1.0f;
         if (actionData != null) {
             if (actionData instanceof DurationChangeActionData) {
                 durationChangeActionData = (DurationChangeActionData) actionData;
@@ -197,16 +197,17 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
                         soundIds.add(R.raw.duration_sound);
                         break;
                     case MARK_TRAINING_COMPLETE:
+                        speed = 2.0f;
                         soundIds.add(R.raw.start_rest_sound);
                         soundIds.add(R.raw.start_rest_sound);
                         break;
                 }
 
                 if (!soundIds.isEmpty() && durationChangeActionData.isPlaySound()) {
-                    this.playSound(soundIds);
+                    this.playSound(soundIds, speed);
                 }
                 if (durationChangeActionData.isVibrate()) {
-                    VibrationHelper.vibrate(this.getContext(), 300);
+                    VibrationHelper.vibrate(this.getContext(), 200);
                 }
             }
         }
@@ -216,11 +217,12 @@ public class WorkoutTrainingFragment extends Fragment implements WorkoutTraining
      * Plays a certain sound resource
      *
      * @param soundIds array of IDs of the sound resources to be played
+     * @param speed the speed at which sound will be played
      */
-    private void playSound(List<Integer> soundIds) {
+    private void playSound(List<Integer> soundIds, float speed) {
         MediaPlayerQueue mediaPlayerQueue;
         mediaPlayerQueue = new MediaPlayerQueue(this.getContext());
-        mediaPlayerQueue.addSoundResource(soundIds);
+        mediaPlayerQueue.addSoundResource(soundIds, speed);
         mediaPlayerQueue.play();
     }
 

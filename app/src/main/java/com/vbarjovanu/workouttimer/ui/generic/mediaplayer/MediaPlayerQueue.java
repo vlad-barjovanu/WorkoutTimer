@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Queue;
 
 public class MediaPlayerQueue {
-    private Queue<Object> soundResourceIdsQueue;
+    private Queue<QueueData> soundResourceIdsQueue;
     private final Context context;
 
     public MediaPlayerQueue(Context context) {
@@ -19,15 +19,17 @@ public class MediaPlayerQueue {
 
     public void play() {
         MediaPlayer mediaPlayer = null;
-        Object object = this.soundResourceIdsQueue.poll();
+        QueueData object = this.soundResourceIdsQueue.poll();
         if (object != null) {
-            if (object instanceof Integer) {
-                mediaPlayer = MediaPlayer.create(this.context, (Integer) object);
+
+            if (object instanceof QueueResourceData) {
+                mediaPlayer = MediaPlayer.create(this.context, ((QueueResourceData) object).getData());
             }
-            if (object instanceof Uri) {
-                mediaPlayer = MediaPlayer.create(this.context, (Uri) object);
+            if (object instanceof QueueUriData) {
+                mediaPlayer = MediaPlayer.create(this.context, ((QueueUriData) object).getData());
             }
             if (mediaPlayer != null) {
+                mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(object.getSpeed()));
                 mediaPlayer.start();
                 mediaPlayer.setOnCompletionListener(mp -> {
                     mp.release();
@@ -40,20 +42,26 @@ public class MediaPlayerQueue {
     }
 
     public void addSoundResource(int soundId) {
-        this.soundResourceIdsQueue.add(soundId);
+        this.soundResourceIdsQueue.add(new QueueResourceData(soundId, 1.0f));
     }
 
-    public void addSoundResource(int[] soundId) {
-        for (int id : soundId) {
-            this.soundResourceIdsQueue.add(id);
+    public void addSoundResource(int[] soundIds) {
+        for (int id : soundIds) {
+            this.soundResourceIdsQueue.add(new QueueResourceData(id, 1.0f));
         }
     }
 
-    public void addSoundResource(List<Integer> soundId) {
-        this.soundResourceIdsQueue.addAll(soundId);
+    public void addSoundResource(List<Integer> soundIds, float speed) {
+        for (Integer id : soundIds) {
+            this.soundResourceIdsQueue.add(new QueueResourceData(id, speed));
+        }
+    }
+
+    public void addSoundResource(List<Integer> soundIds) {
+        this.addSoundResource(soundIds, 1.0f);
     }
 
     public void addSoundUri(Uri uri) {
-        this.soundResourceIdsQueue.add(uri);
+        this.soundResourceIdsQueue.add(new QueueUriData(uri, 1.0f));
     }
 }
